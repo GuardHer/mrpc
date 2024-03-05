@@ -11,8 +11,7 @@ static thread_local int32_t g_thread_id = 0;
 
 int32_t getPid()
 {
-    if (g_pid)
-    {
+    if (g_pid) {
         return g_pid;
     }
     g_pid = getpid();
@@ -21,8 +20,7 @@ int32_t getPid()
 
 int32_t getThreadId()
 {
-    if (g_thread_id)
-    {
+    if (g_thread_id) {
         return g_thread_id;
     }
 
@@ -30,4 +28,4 @@ int32_t getThreadId()
     return g_thread_id;
 }
 
-} // namespace mrpc
+}// namespace mrpc

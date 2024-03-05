@@ -7,6 +7,6 @@ namespace mrpc
 int32_t getPid();
 
 int32_t getThreadId();
-} // namespace mrpc
+}// namespace mrpc
 
-#endif // MRPC_COMMON_UTIL_H
+#endif// MRPC_COMMON_UTIL_H
