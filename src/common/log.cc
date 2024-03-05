@@ -1,17 +1,12 @@
-#include "src/common/log.h"
+// #include "src/common/log.h"
+// #include "src/common/util.h"
+#include "log.h"
+#include "util.h"
 
 #include <stdio.h>
 #include <sys/time.h>
 
 #include <sstream>
-
-#include "src/common/util.h"
-
-#define LOG_DEBUG(str, ...)                                                                                            \
-    std::string msg =                                                                                                  \
-        (new mrpc::LogEvent(mrpc::LogLevel::DEBUG)->toString()) + mrpc::formatString(str, ##__VA_ARGS__);              \
-    mrpc::g_logger->pushLog(msg);                                                                                      \
-    mrpc::g_logger->log();
 
 namespace mrpc
 {
@@ -45,11 +40,11 @@ std::string LogLevelToString(LogLevel level)
 
 Logger *Logger::GetGlobalLogger()
 {
-    if (g_logger == nullptr)
+    if (g_logger)
     {
-        g_logger = new Logger();
+        return g_logger;
     }
-
+    g_logger = new Logger();
     return g_logger;
 }
 
@@ -64,7 +59,7 @@ void Logger::log()
     {
         std::string msg = m_buffer.front();
         m_buffer.pop();
-        printf(msg.c_str());
+        printf("%s", msg.c_str());
     }
 }
 
@@ -89,7 +84,7 @@ std::string LogEvent::toString()
     std::stringstream ss;
     ss << "[" << LogLevelToString(m_level) << "]\t"
        << "[" << time_str << "]\t"
-       << "[" << std::string(__FILE__) << __LINE__ << "]\t";
+       << "[" << std::string(__FILE__) << ":" << __LINE__ << "]\t";
 
     return ss.str();
 }

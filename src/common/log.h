@@ -18,6 +18,8 @@ template <typename... Args> std::string formatString(const char *str, Args &&...
         result.resize(size);
         snprintf(&result[0], size + 1, str, args...);
     }
+
+    return result;
 }
 
 enum LogLevel
@@ -74,6 +76,12 @@ class LogEvent
     LogLevel m_level; // 日志级别
     Logger::s_ptr m_logger;
 };
+
+#define LOG_DEBUG(str, ...)                                                                                            \
+    std::string msg =                                                                                                  \
+        (new mrpc::LogEvent(mrpc::LogLevel::DEBUG)->toString()) + mrpc::formatString(str, ##__VA_ARGS__);              \
+    mrpc::Logger::GetGlobalLogger()->pushLog(msg);                                                                     \
+    mrpc::Logger::GetGlobalLogger()->log();
 
 } // namespace mrpc
 
