@@ -1,6 +1,7 @@
 #ifndef MRPC_COMMON_LOG_H
 #define MRPC_COMMON_LOG_H
 
+#include "mutex.h"
 #include <memory>
 #include <queue>
 #include <string>
@@ -44,14 +45,18 @@ public:
     typedef std::shared_ptr<Logger> s_ptr;
     void pushLog(const std::string &msg);
     void log();
+    LogLevel getLogLevel() const { return m_set_level; }
 
 public:
     static Logger *GetGlobalLogger();
+    static void InitGlobalLogger();
 
 private:
     LogLevel m_set_level;
 
     std::queue<std::string> m_buffer;
+
+    mrpc::Mutex m_mutex;
 };
 
 class LogEvent
@@ -74,17 +79,17 @@ private:
     Logger::s_ptr m_logger;
 };
 
-#define LOG_DEBUG(str, ...)                                                     \
-    std::string msg = (new mrpc::LogEvent(mrpc::LogLevel::DEBUG))->toString() + \
-                      mrpc::formatString(str, ##__VA_ARGS__);                   \
-    mrpc::Logger::GetGlobalLogger()->pushLog(msg);                              \
-    mrpc::Logger::GetGlobalLogger()->log();
+#define LOG_DEBUG(str, ...)                                                                                                                                                                                               \
+    if (mrpc::Logger::GetGlobalLogger()->getLogLevel() <= mrpc::LogLevel::DEBUG) {                                                                                                                                        \
+        mrpc::Logger::GetGlobalLogger()->pushLog((new mrpc::LogEvent(mrpc::LogLevel::DEBUG))->toString() + "[" + std::string(__FILE__) + ":" + std::to_string(__LINE__) + "]-" + mrpc::formatString(str, ##__VA_ARGS__)); \
+        mrpc::Logger::GetGlobalLogger()->log();                                                                                                                                                                           \
+    }
 
-#define LOG_INFO(str, ...)                                                      \
-    std::string msg = (new mrpc::LogEvent(mrpc::LogLevel::INFO))->toString() + \
-                      mrpc::formatString(str, ##__VA_ARGS__);                   \
-    mrpc::Logger::GetGlobalLogger()->pushLog(msg);                              \
-    mrpc::Logger::GetGlobalLogger()->log();
+#define LOG_INFO(str, ...)                                                                                                                                                                                               \
+    if (mrpc::Logger::GetGlobalLogger()->getLogLevel() <= mrpc::LogLevel::INFO) {                                                                                                                                        \
+        mrpc::Logger::GetGlobalLogger()->pushLog((new mrpc::LogEvent(mrpc::LogLevel::INFO))->toString() + "[" + std::string(__FILE__) + ":" + std::to_string(__LINE__) + "]-" + mrpc::formatString(str, ##__VA_ARGS__)); \
+        mrpc::Logger::GetGlobalLogger()->log();                                                                                                                                                                          \
+    }
 
 }// namespace mrpc
 

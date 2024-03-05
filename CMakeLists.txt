@@ -32,6 +32,8 @@ set(LIBS
 set(SOURCE_FILE_COMMON
     ${PROJECT_SOURCE_DIR}/src/common/util.cc
     ${PROJECT_SOURCE_DIR}/src/common/log.cc
+	${PROJECT_SOURCE_DIR}/src/common/config.cc
+	${PROJECT_SOURCE_DIR}/src/common/mutex.h
 )
 
 # net目录源文件

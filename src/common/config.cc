@@ -12,11 +12,11 @@ using namespace tinyxml2;
 
 #define READ_STR_XML_NODE(name, root)                                        \
     XMLElement *name##_node = root->FirstChildElement(#name);                \
-    if (!name##_node || !name##_node->GetText()) {                           \
+    if (!name##_node || name##_node->GetText() == nullptr) {                 \
         printf("Start mrpc server error, faild to read node [%s]\n", #name); \
         exit(0);                                                             \
     }                                                                        \
-    std::string name## = std::string(name##_node->GetText());
+    std::string name##_str = std::string(name##_node->GetText());
 
 namespace mrpc
 {
@@ -36,7 +36,7 @@ Config::Config(const char *xmlfile)
 
     READ_STR_XML_NODE(log_level, log_node);
 
-    m_log_level = log_level;
+    m_log_level = log_level_str;
 }
 
 

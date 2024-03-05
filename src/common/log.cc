@@ -54,25 +54,33 @@ LogLevel StringToLogLevel(const std::string &string_level)
 
 Logger *Logger::GetGlobalLogger()
 {
-    if (g_logger) {
-        return g_logger;
-    }
-
-    LogLevel global_log_level = StringToLogLevel(Config::GetGlobalConfig()->m_log_level);
-    g_logger = new Logger(global_log_level);
     return g_logger;
+}
+void Logger::InitGlobalLogger()
+{
+    if (g_logger == nullptr) {
+        LogLevel global_log_level = StringToLogLevel(Config::GetGlobalConfig()->m_log_level);
+        g_logger = new Logger(global_log_level);
+    }
 }
 
 void Logger::pushLog(const std::string &msg)
 {
+    ScopeMutex<Mutex> lock(m_mutex);
     m_buffer.push(msg);
+    lock.unlock();
 }
 
 void Logger::log()
 {
-    while (!m_buffer.empty()) {
-        std::string msg = m_buffer.front();
-        m_buffer.pop();
+    ScopeMutex<Mutex> lock(m_mutex);
+    std::queue<std::string> tmp;
+    m_buffer.swap(tmp);
+    lock.unlock();
+
+    while (!tmp.empty()) {
+        std::string msg = tmp.front();
+        tmp.pop();
         printf("%s\n", msg.c_str());
     }
 }
@@ -98,8 +106,8 @@ std::string LogEvent::toString()
     std::stringstream ss;
     ss << "[" << LogLevelToString(m_level) << "]"
        << "[" << time_str << "]"
-       << "[" << m_pid << ":" << m_thread_id << "]"
-       << "[" << std::string(__FILE__) << ":" << __LINE__ << "]-";
+       << "[" << m_pid << ":" << m_thread_id << "]";
+       //<< "[" << std::string(__FILE__) << ":" << __LINE__ << "]-";
 
     return ss.str();
 }

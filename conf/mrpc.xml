@@ -2,7 +2,7 @@
 
 <root>
 	<log>
-		<log-level>DEBUG</log-level>
+		<log_level>INFO</log_level>
 	</log>
 
 </root>
