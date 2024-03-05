@@ -4,9 +4,9 @@
 #include <unistd.h>
 namespace mrpc
 {
-	int32_t getPid();
+int32_t getPid();
 
-	int32_t getThreadId();
-}
+int32_t getThreadId();
+} // namespace mrpc
 
 #endif // MRPC_COMMON_UTIL_H
