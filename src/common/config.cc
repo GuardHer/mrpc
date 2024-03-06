@@ -1,4 +1,4 @@
-#include "config.h"
+#include "src/common/config.h"
 #include <tinyxml2.h>
 
 using namespace tinyxml2;

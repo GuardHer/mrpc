@@ -5,7 +5,6 @@
 namespace mrpc
 {
 int32_t getPid();
-
 int32_t getThreadId();
 }// namespace mrpc
 

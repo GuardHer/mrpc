@@ -15,8 +15,8 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)    # 设置库文�
 
 # 设置头文件路径
 include_directories(
-    ${PROJECT_SOURCE_DIR}/include
-    ${PROJECT_SOURCE_DIR}
+    # ${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/
     "/usr/local/include/google"   # protobuf头文件路径
     "/usr/local/include/tinyxml"  # tinyxml头文件路径
 )
@@ -32,13 +32,14 @@ set(LIBS
 set(SOURCE_FILE_COMMON
     ${PROJECT_SOURCE_DIR}/src/common/util.cc
     ${PROJECT_SOURCE_DIR}/src/common/log.cc
+    ${PROJECT_SOURCE_DIR}/src/common/log_stream.cc
 	${PROJECT_SOURCE_DIR}/src/common/config.cc
 	${PROJECT_SOURCE_DIR}/src/common/mutex.h
 )
 
 # net目录源文件
 set(SOURCE_FILE_NET
-    # 添加net目录中的源文件
+	${PROJECT_SOURCE_DIR}/src/net/eventloop.cc
 )
 
 # 生成库文件

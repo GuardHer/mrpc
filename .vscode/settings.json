@@ -60,6 +60,8 @@
 		"mutex": "cpp",
 		"semaphore": "cpp",
 		"stop_token": "cpp",
-		"thread": "cpp"
+		"thread": "cpp",
+		"span": "cpp",
+		"filesystem": "cpp"
 	}
 }
