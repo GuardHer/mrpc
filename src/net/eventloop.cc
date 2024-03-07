@@ -85,6 +85,8 @@ void EventLoop::loop()
             if (cb) cb();
         }
 
+        /// 定时任务
+
         int timeout = g_epoll_max_timeout;
         epoll_event result_events[g_epoll_max_events];
         LOG_DEBUG << "now begin to epoll_wait!";

@@ -5,10 +5,41 @@
 [level][%y-%m-%d %H:%M:%S.%ms]\t[pid:thread_id]\t[file_name:line][%msg]
 ```
 
-Logger 日志器
+### Logger 日志器
 1.提供打印日志的方法
 2.
 
 ```
+
+```
+
+### net 网络
+
+#### EventLoop 事件循环
+
+
+#### TimerEvent 定时任务
+1、arrive_time   ：指定时间点 
+2、interval, ms  ：间隔
+3、is_repeated   ：是否重复
+4、is_cancled	 ：取消
+5、task
+
+cancle()         ：取消定时任务
+cancleRepeated() ：取消定时任务的重复属性
+
+
+#### Timer
+`定时器，他是一个TimerEvent的集合`
+`Timer 继承自 FdEvent`
+
+```
+addTimerEvent()
+delTimerEvent()
+onTimer()
+
+reserArriveTime()
+
+multimap 存储 TimerEvent <key(arrive_time), TimerEvent>
 
 ```

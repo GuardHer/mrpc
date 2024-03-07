@@ -1,6 +1,9 @@
 #include "src/common/util.h"
 
 #include <sys/syscall.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 namespace mrpc
 {
@@ -25,6 +28,14 @@ int32_t getThreadId()
 
     t_thread_id = syscall(SYS_gettid);
     return t_thread_id;
+}
+
+int64_t getNowMs()
+{
+    timeval val;
+    gettimeofday(&val, nullptr);
+
+    return val.tv_sec * 1000 + val.tv_usec / 1000;
 }
 
 }// namespace mrpc
