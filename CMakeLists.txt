@@ -40,6 +40,9 @@ set(SOURCE_FILE_COMMON
 # net目录源文件
 set(SOURCE_FILE_NET
 	${PROJECT_SOURCE_DIR}/src/net/eventloop.cc
+	${PROJECT_SOURCE_DIR}/src/net/fd_event.cc
+	${PROJECT_SOURCE_DIR}/src/net/wakeup_fd_event.cc
+
 )
 
 # 生成库文件
@@ -53,10 +56,17 @@ add_executable(mrpc
 )
 target_link_libraries(mrpc ${LIBS})
 
+
+# 测试用例
 add_executable(test_log 
 	${SOURCE_FILE_COMMON} 
 	${PROJECT_SOURCE_DIR}/test/test_log.cc
 )
 target_link_libraries(test_log ${LIBS})
 
-
+add_executable(test_eventloop 
+	${SOURCE_FILE_COMMON} 
+	${SOURCE_FILE_NET}
+	${PROJECT_SOURCE_DIR}/test/test_eventloop.cc
+)
+target_link_libraries(test_eventloop ${LIBS})

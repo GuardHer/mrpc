@@ -49,14 +49,14 @@ private:
     mrpc::Mutex m_mutex;
 };
 
-class LogEvent
+class Logging
 {
 public:
-    LogEvent(LogLevel level) : m_level(level) {}
-    LogEvent(const char *file, int line, LogLevel level, const char *func)
+    Logging(LogLevel level) : m_level(level) {}
+    Logging(const char *file, int line, LogLevel level, const char *func)
         : m_file_name(extractFileName(std::string(file))), m_func_name(std::string(func)), m_file_line(line), m_level(level), m_thread_id(getThreadId()), m_pid(getPid()) {}
 
-    ~LogEvent();
+    ~Logging();
 
 public:
     std::string getFileName() const { return m_file_name; }
@@ -78,19 +78,19 @@ private:
 
 #define LOG_DEBUG                                                                \
     if (mrpc::Logger::GetGlobalLogger()->getLogLevel() <= mrpc::LogLevel::DEBUG) \
-    mrpc::LogEvent(__FILE__, __LINE__, mrpc::LogLevel::DEBUG, __func__).stream()
+    mrpc::Logging(__FILE__, __LINE__, mrpc::LogLevel::DEBUG, __func__).stream()
 #define LOG_INFO                                                                \
     if (mrpc::Logger::GetGlobalLogger()->getLogLevel() <= mrpc::LogLevel::INFO) \
-    mrpc::LogEvent(__FILE__, __LINE__, mrpc::LogLevel::INFO, __func__).stream()
+    mrpc::Logging(__FILE__, __LINE__, mrpc::LogLevel::INFO, __func__).stream()
 #define LOG_WARNING                                                                \
     if (mrpc::Logger::GetGlobalLogger()->getLogLevel() <= mrpc::LogLevel::WARNING) \
-    mrpc::LogEvent(__FILE__, __LINE__, mrpc::LogLevel::WARNING, __func__).stream()
+    mrpc::Logging(__FILE__, __LINE__, mrpc::LogLevel::WARNING, __func__).stream()
 #define LOG_ERROR                                                                \
     if (mrpc::Logger::GetGlobalLogger()->getLogLevel() <= mrpc::LogLevel::ERROR) \
-    mrpc::LogEvent(__FILE__, __LINE__, mrpc::LogLevel::ERROR, __func__).stream()
+    mrpc::Logging(__FILE__, __LINE__, mrpc::LogLevel::ERROR, __func__).stream()
 #define LOG_FATAL                                                                \
     if (mrpc::Logger::GetGlobalLogger()->getLogLevel() <= mrpc::LogLevel::FATAL) \
-    mrpc::LogEvent(__FILE__, __LINE__, mrpc::LogLevel::FATAL, __func__).stream()
+    mrpc::Logging(__FILE__, __LINE__, mrpc::LogLevel::FATAL, __func__).stream()
 
 }// namespace mrpc
 

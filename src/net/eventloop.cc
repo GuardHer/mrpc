@@ -80,13 +80,17 @@ void EventLoop::loop()
         lock.unlock();
 
         while (!tmp_tasks.empty()) {
-            tmp_tasks.front()();// 执行函数
+            auto cb = tmp_tasks.front();
             tmp_tasks.pop();
+            if (cb) cb();
         }
 
         int timeout = g_epoll_max_timeout;
         epoll_event result_events[g_epoll_max_events];
+        LOG_DEBUG << "now begin to epoll_wait!";
         int ret = epoll_wait(m_epoll_fd, result_events, g_epoll_max_events, timeout);
+        LOG_DEBUG << "now end to epoll_wait, cnt: " << ret;
+
         if (ret < 0) {
             LOG_ERROR << "epoll_wait error, errno = " << strerror(errno);
         } else {
@@ -94,10 +98,10 @@ void EventLoop::loop()
                 epoll_event trigger_event = result_events[i];
                 FdEvent *fd_event = static_cast<FdEvent *>(trigger_event.data.ptr);
                 if (fd_event == nullptr) { continue; }
-                if (trigger_event.events | EPOLLIN) {
+                if (trigger_event.events & EPOLLIN) {// 读事件
                     addTask(fd_event->getReadCollback());
                 }
-                if (trigger_event.events | EPOLLOUT) {
+                if (trigger_event.events & EPOLLOUT) {// 写事件
                     addTask(fd_event->getWriteCollback());
                 }
             }
@@ -122,6 +126,7 @@ void EventLoop::addTask(Task cb, bool is_wake_up /* = false */)
 void EventLoop::addEpollEvent(FdEvent *event)
 {
     if (isInLoopThread()) {
+        LOG_DEBUG;
         ADD_TO_EPOLL();
     } else {
         auto cb = [this, event]() { ADD_TO_EPOLL(); };
@@ -142,6 +147,7 @@ void EventLoop::delEpollEvent(FdEvent *event)
 
 void EventLoop::wakeup()
 {
+    m_wakeup_fd_event->wakeup();
 }
 
 int EventLoop::createEventfd()
@@ -166,8 +172,9 @@ void EventLoop::initWakeUpFdEvent()
 }
 
 
-void EventLoop::stop()
+void EventLoop::quit()
 {
+    m_stop_flag = true;
 }
 
 bool EventLoop::isInLoopThread()

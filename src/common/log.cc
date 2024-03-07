@@ -140,7 +140,7 @@ void Logger::log()
     }
 }
 
-LogStream &LogEvent::stream()
+LogStream &Logging::stream()
 {
     struct timeval now_time;
     gettimeofday(&now_time, nullptr);
@@ -163,7 +163,7 @@ LogStream &LogEvent::stream()
     return m_stream;
 }
 
-LogEvent::~LogEvent()
+Logging::~Logging()
 {
     m_stream << "\n";
 

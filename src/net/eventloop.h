@@ -24,7 +24,7 @@ public:
 
     void loop();
     void wakeup();
-    void stop();
+    void quit();
 
     void addTask(Task cb, bool is_wake_up = false);
     void addEpollEvent(FdEvent *event);

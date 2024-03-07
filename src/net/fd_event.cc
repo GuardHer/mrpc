@@ -1,9 +1,11 @@
 #include "src/net/fd_event.h"
+#include <string.h>
 
 namespace mrpc
 {
 FdEvent::FdEvent(int fd) : m_fd(fd)
 {
+    memset(&m_listen_events, 0, sizeof(m_listen_events));
 }
 
 FdEvent::~FdEvent()
