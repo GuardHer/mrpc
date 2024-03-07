@@ -46,7 +46,9 @@ EventLoop::EventLoop() : m_wakeup_fd_event(nullptr)
         LOG_FATAL << "failed to create event loop, this thread has created event loop";
     }
 
+    // 获取当前loop所在的线程id
     m_tid = getThreadId();
+    // 创建 epoll_fd
     m_epoll_fd = epoll_create(10);
 
     if (m_epoll_fd == -1) {
@@ -56,6 +58,7 @@ EventLoop::EventLoop() : m_wakeup_fd_event(nullptr)
     // wakeup fd event
     initWakeUpFdEvent();
 
+    // 初始化timer
     initTimer();
 
 
@@ -86,31 +89,37 @@ void EventLoop::loop()
         tmp_tasks.swap(m_pending_tasks);
         lock.unlock();
 
+        // 如果任务队列不为空, 就取出任务并执行
         while (!tmp_tasks.empty()) {
             auto cb = tmp_tasks.front();
             tmp_tasks.pop();
             if (cb) cb();
         }
 
-        /// 定时任务
-
+        // epoll_wait 的超时时间
         int timeout = g_epoll_max_timeout;
+        // epollfd 触发的事件数组
         epoll_event result_events[g_epoll_max_events];
-        LOG_DEBUG << "now begin to epoll_wait!";
+        // 等待事件发生, 将事件保存到 result_events, 超时: timeout, 在超时时间内没有事件发生会自动返回0, 返回事件的个数
         int ret = epoll_wait(m_epoll_fd, result_events, g_epoll_max_events, timeout);
-        LOG_DEBUG << "now end to epoll_wait, cnt: " << ret;
 
         if (ret < 0) {
             LOG_ERROR << "epoll_wait error, errno = " << strerror(errno);
         } else {
             for (int i = 0; i < ret; i++) {
+                // 取出事件
                 epoll_event trigger_event = result_events[i];
+                // 取出触发的事件中保存的FdEvent指针, 详细看 FdEvent::listen 函数
                 FdEvent *fd_event = static_cast<FdEvent *>(trigger_event.data.ptr);
                 if (fd_event == nullptr) { continue; }
-                if (trigger_event.events & EPOLLIN) {// 读事件
+                // 读事件
+                if (trigger_event.events & EPOLLIN) {
+                    // 添加读事件到任务队列
                     addTask(fd_event->getReadCollback());
                 }
-                if (trigger_event.events & EPOLLOUT) {// 写事件
+                // 写事件
+                if (trigger_event.events & EPOLLOUT) {
+                    // 添加写事件到任务队列
                     addTask(fd_event->getWriteCollback());
                 }
             }
@@ -127,6 +136,7 @@ void EventLoop::addTask(Task cb, bool is_wake_up /* = false */)
     }
 
     if (is_wake_up) {
+        // 唤醒epoll_wait
         wakeup();
     }
 }
@@ -140,7 +150,6 @@ void EventLoop::addTimerEvent(TimerEvent::s_ptr event)
 void EventLoop::addEpollEvent(FdEvent *event)
 {
     if (isInLoopThread()) {
-        LOG_DEBUG;
         ADD_TO_EPOLL();
     } else {
         auto cb = [this, event]() { ADD_TO_EPOLL(); };
