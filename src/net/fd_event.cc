@@ -8,6 +8,11 @@ FdEvent::FdEvent(int fd) : m_fd(fd)
     memset(&m_listen_events, 0, sizeof(m_listen_events));
 }
 
+FdEvent::FdEvent()
+{
+    memset(&m_listen_events, 0, sizeof(m_listen_events));
+}
+
 FdEvent::~FdEvent()
 {
 }
@@ -15,9 +20,11 @@ FdEvent::~FdEvent()
 void FdEvent::handler(TriggerEvent event_type)
 {
     if (event_type == TriggerEvent::EVENT_IN) {
-        m_read_callback();
+        if (m_read_callback)
+            m_read_callback();
     } else {
-        m_write_callback();
+        if (m_write_callback)
+            m_write_callback();
     }
 }
 void FdEvent::listen(TriggerEvent event_type, std::function<void()> callback)

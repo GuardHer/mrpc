@@ -21,9 +21,24 @@ enum LogLevel
     FATAL
 };
 
+/// @brief 日志级别转字符串
+/// @param level 日志级别
+/// @return string
 std::string LogLevelToString(LogLevel level);
+
+/// @brief 字符串转日志级别
+/// @param string_level 日志字符串
+/// @return loglevel
 LogLevel StringToLogLevel(const std::string &string_level);
+
+/// @brief 从绝对路径或者相对路径中获取文件名
+/// @param absolutePath
+/// @return string 文件名
 std::string extractFileName(const std::string &absolutePath);
+
+/// @brief 获取日志级别对应的color
+/// @param level 日志级别
+/// @return color对应的str
 const char *levelToColor(LogLevel level);
 
 class Logger
@@ -34,19 +49,31 @@ public:
 
 public:
     typedef std::shared_ptr<Logger> s_ptr;
+
+    /// @brief 将日志入队列, 写入日志到缓存
+    /// @param msg
     void pushLog(const std::string &msg);
+
+    /// @brief 处理队列中的日志(写入文件或者stdout)
     void log();
+
+    /// @brief 获取g_logger对应的level
+    /// @return m_set_level
     LogLevel getLogLevel() const { return m_set_level; }
 
 public:
+    /// @brief 获取全局logger对象
+    /// @return g_logger
     static Logger *GetGlobalLogger();
+
+    /// @brief 初始化全局日志对象: g_logger
     static void InitGlobalLogger();
 
 
 private:
-    LogLevel m_set_level;
-    std::queue<std::string> m_buffer;
-    mrpc::Mutex m_mutex;
+    LogLevel m_set_level;            // 全局日志级别
+    mrpc::Mutex m_mutex;             // 互斥锁
+    std::queue<std::string> m_buffer;// 日志缓存 (mutex)
 };
 
 class Logging
@@ -59,9 +86,16 @@ public:
     ~Logging();
 
 public:
+    /// @brief  获取当前日志所在的文件
+    /// @return string: m_file_name
     std::string getFileName() const { return m_file_name; }
+
+    /// @brief 获取当前日志对应的级别
+    /// @return LogLeval: m_level
     LogLevel getLogLevel() const { return m_level; }
-    /// 返回LogStream对象, 注意要返回引用
+
+    /// @brief 获取当前日志流对象, 注意要返回引用
+    /// @return LogStream&: m_stream的引用
     LogStream &stream();
 
 private:
@@ -71,9 +105,7 @@ private:
     LogLevel m_level;       // 日志级别
     int32_t m_thread_id;    // 线程id
     int32_t m_pid;          // 进程id
-
-
-    LogStream m_stream;
+    LogStream m_stream;     // 日志流
 };
 
 #define LOG_DEBUG                                                                \

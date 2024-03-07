@@ -56,6 +56,8 @@ EventLoop::EventLoop() : m_wakeup_fd_event(nullptr)
     // wakeup fd event
     initWakeUpFdEvent();
 
+    initTimer();
+
 
     LOG_DEBUG << "succ create event loop in thread: " << m_tid;
 
@@ -68,6 +70,11 @@ EventLoop::~EventLoop()
     if (m_wakeup_fd_event) {
         delete m_wakeup_fd_event;
         m_wakeup_fd_event = nullptr;
+    }
+
+    if (m_timer) {
+        delete m_timer;
+        m_timer = nullptr;
     }
 }
 
@@ -124,6 +131,11 @@ void EventLoop::addTask(Task cb, bool is_wake_up /* = false */)
     }
 }
 
+void EventLoop::addTimerEvent(TimerEvent::s_ptr event)
+{
+    m_timer->addTimerEvent(event);
+}
+
 // run in loop : FdEvent
 void EventLoop::addEpollEvent(FdEvent *event)
 {
@@ -171,6 +183,12 @@ void EventLoop::initWakeUpFdEvent()
         LOG_DEBUG << "read full bytes form wakeup fd: " << m_wakeup_fd;
     });
     addEpollEvent(m_wakeup_fd_event);
+}
+
+void EventLoop::initTimer()
+{
+    m_timer = new Timer();
+    addEpollEvent(m_timer);
 }
 
 

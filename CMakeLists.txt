@@ -42,6 +42,8 @@ set(SOURCE_FILE_NET
 	${PROJECT_SOURCE_DIR}/src/net/eventloop.cc
 	${PROJECT_SOURCE_DIR}/src/net/fd_event.cc
 	${PROJECT_SOURCE_DIR}/src/net/wakeup_fd_event.cc
+	${PROJECT_SOURCE_DIR}/src/net/timer.cc
+	${PROJECT_SOURCE_DIR}/src/net/timer_event.cc
 
 )
 
@@ -57,16 +59,26 @@ add_executable(mrpc
 target_link_libraries(mrpc ${LIBS})
 
 
-# 测试用例
-add_executable(test_log 
+## 测试用例
+# test_log
+add_executable(log_test 
 	${SOURCE_FILE_COMMON} 
 	${PROJECT_SOURCE_DIR}/test/test_log.cc
 )
-target_link_libraries(test_log ${LIBS})
+target_link_libraries(log_test ${LIBS})
 
-add_executable(test_eventloop 
+# test_eventloop
+add_executable(eventloop_test
 	${SOURCE_FILE_COMMON} 
 	${SOURCE_FILE_NET}
 	${PROJECT_SOURCE_DIR}/test/test_eventloop.cc
 )
-target_link_libraries(test_eventloop ${LIBS})
+target_link_libraries(eventloop_test ${LIBS})
+
+# test_timer
+add_executable(timer_test
+	${SOURCE_FILE_COMMON} 
+	${SOURCE_FILE_NET}
+	${PROJECT_SOURCE_DIR}/test/test_timer.cc
+)
+target_link_libraries(timer_test ${LIBS})

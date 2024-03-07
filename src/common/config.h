@@ -12,7 +12,12 @@ public:
     Config(const char *xmlfile);
 
 public:
+    /// @brief  获取全局config对象
+    /// @return g_config
     static Config *GetGlobalConfig();
+
+    /// @brief 初始化全局config对象
+    /// @param xmlfile : 配置xml文件路径
     static void SetGlobalConfig(const char *xmlfile);
 
 public:

@@ -13,6 +13,7 @@ public:
     WakeUpFdEvent(int fd);
     ~WakeUpFdEvent();
 
+    /// @brief 唤醒epill_wait
     void wakeup();
 
 private:

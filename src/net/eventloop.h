@@ -4,6 +4,8 @@
 #include "src/common/mutex.h"
 #include "src/common/util.h"
 #include "src/net/fd_event.h"
+#include "src/net/timer.h"
+#include "src/net/timer_event.h"
 #include "src/net/wakeup_fd_event.h"
 #include <functional>
 #include <queue>
@@ -36,6 +38,10 @@ public:
     /// @param is_wake_up: 是否立即唤醒epoll_wait
     void addTask(Task cb, bool is_wake_up = false);
 
+    /// @brief 添加定时任务
+    /// @param event
+    void addTimerEvent(TimerEvent::s_ptr event);
+
     /// @brief 添加事件
     /// @param event
     void addEpollEvent(FdEvent *event);
@@ -52,17 +58,19 @@ private:
     /// @brief 初始化 wakeup_fd
     void initWakeUpFdEvent();
 
+    /// @brief 初始化 m_timer
+    void initTimer();
+
 private:
     int32_t m_tid{0};                // 进程id
     int m_epoll_fd{0};               // epoll_fd
     int m_wakeup_fd{0};              // wake_fd
     WakeUpFdEvent *m_wakeup_fd_event;// wake_fd_event
     bool m_stop_flag{false};         // 是否停止
-
     std::set<int> m_listen_fds;      // 监听套接字集合 (wake_fd, client_fd, timer_fd)
     std::queue<Task> m_pending_tasks;// 任务队列 (需要mutex)
-
-    Mutex m_mutex;
+    Mutex m_mutex;                   // 互斥锁
+    Timer *m_timer{nullptr};         // 定时器
 };
 
 }// namespace mrpc

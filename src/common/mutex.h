@@ -10,18 +10,22 @@ template<class T>
 class ScopeMutex
 {
 public:
+    /// @brief 构造函数，默认加锁
+    /// @param mutex
     ScopeMutex(T &mutex) : m_mutex(mutex)
     {
         m_mutex.lock();
         m_is_lock = true;
     }
 
+    /// @brief 超出作用域自动解锁
     ~ScopeMutex()
     {
-        m_mutex.unlock();
+        if (m_is_lock) m_mutex.unlock();
         m_is_lock = false;
     }
 
+    /// @brief 加锁
     void lock()
     {
         if (!m_is_lock) {
@@ -30,6 +34,7 @@ public:
         }
     }
 
+    /// @brief 解锁
     void unlock()
     {
         if (m_is_lock) {
