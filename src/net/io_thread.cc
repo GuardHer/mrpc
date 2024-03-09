@@ -54,7 +54,7 @@ void *IOThread::Main(void *arg)
 
     LOG_DEBUG << "IOThread created, wait start semaphore!";
 
-    // 等待开启loop
+    // 当线程等待, 直到主动开启loop循环
     sem_wait(&thread->m_start_semaphore);
 
     // 开启loop循环

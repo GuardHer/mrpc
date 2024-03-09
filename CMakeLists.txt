@@ -45,6 +45,7 @@ set(SOURCE_FILE_NET
 	${PROJECT_SOURCE_DIR}/src/net/timer.cc
 	${PROJECT_SOURCE_DIR}/src/net/timer_event.cc
 	${PROJECT_SOURCE_DIR}/src/net/io_thread.cc
+	${PROJECT_SOURCE_DIR}/src/net/io_thread_pool.cc
 
 )
 
