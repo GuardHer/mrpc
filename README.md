@@ -43,3 +43,17 @@ reserArriveTime()
 multimap 存储 TimerEvent <key(arrive_time), TimerEvent>
 
 ```
+
+#### IO线程
+1、创建一个新线程
+2、在新线程里面创建一个EventLoop，完成初始化
+3、开启loop
+
+```
+ class {
+	
+	pthread_t m_thread;
+	int32_t m_tid;
+	EventLoop event_loop;
+ }
+```
