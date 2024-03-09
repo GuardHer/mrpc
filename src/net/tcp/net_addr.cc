@@ -20,14 +20,18 @@ IPNetAddr::IPNetAddr(const std::string &ip, uint16_t port)
 IPNetAddr::IPNetAddr(const std::string &addr)
 {
     // 查找第一个 : 的位置
-    size_t i = addr.find_first_not_of(":");
+    size_t i = addr.find_last_of(":");
     if (i == addr.npos) {
         LOG_ERROR << "invalid ipv4 addr string: " << addr;
         return;
     }
 
+
     m_ip = addr.substr(0, i);
     m_port = std::atoi(addr.substr(i + 1, addr.size() - i - 1).c_str());
+
+    LOG_INFO << "ip: " << m_ip;
+    LOG_INFO << "port: " << m_port;
 
     memset(&m_addr, 0, sizeof(m_addr));
 
@@ -59,10 +63,21 @@ int IPNetAddr::getFamily()
 
 std::string IPNetAddr::toString()
 {
-	std::string re;
+    std::string re;
 
-	re = m_ip + ":" + std::to_string(m_port);
-	return re;
+    re = m_ip + ":" + std::to_string(m_port);
+
+    return re;
+}
+
+bool IPNetAddr::checkValid()
+{
+    if (m_ip.empty() ||
+        m_port <= 0 ||
+        m_port > 65536 ||
+        inet_addr(m_ip.c_str()) == INADDR_NONE) return false;
+
+    return true;
 }
 
 }// namespace mrpc
