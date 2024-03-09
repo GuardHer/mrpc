@@ -62,6 +62,16 @@
 		"stop_token": "cpp",
 		"thread": "cpp",
 		"span": "cpp",
-		"filesystem": "cpp"
+		"filesystem": "cpp",
+		"forward_list": "cpp",
+		"list": "cpp",
+		"buffer": "cpp",
+		"executor": "cpp",
+		"internet": "cpp",
+		"io_context": "cpp",
+		"netfwd": "cpp",
+		"socket": "cpp",
+		"timer": "cpp",
+		"future": "cpp"
 	}
 }

@@ -47,6 +47,10 @@ set(SOURCE_FILE_NET
 	${PROJECT_SOURCE_DIR}/src/net/io_thread.cc
 	${PROJECT_SOURCE_DIR}/src/net/io_thread_pool.cc
 
+	${PROJECT_SOURCE_DIR}/src/net/tcp/tcp_buffer.cc
+	${PROJECT_SOURCE_DIR}/src/net/tcp/tcp_acceptor.cc
+	${PROJECT_SOURCE_DIR}/src/net/tcp/net_addr.cc
+
 )
 
 # 生成库文件
@@ -84,3 +88,11 @@ add_executable(timer_test
 	${PROJECT_SOURCE_DIR}/test/test_timer.cc
 )
 target_link_libraries(timer_test ${LIBS})
+
+# test_tcp
+add_executable(tcp_test
+	${SOURCE_FILE_COMMON} 
+	${SOURCE_FILE_NET}
+	${PROJECT_SOURCE_DIR}/test/test_tcp.cc
+)
+target_link_libraries(tcp_test ${LIBS})

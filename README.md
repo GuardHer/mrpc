@@ -41,7 +41,6 @@ onTimer()
 reserArriveTime()
 
 multimap 存储 TimerEvent <key(arrive_time), TimerEvent>
-
 ```
 
 #### IO线程
