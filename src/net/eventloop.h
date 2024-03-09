@@ -22,6 +22,8 @@ public:
     typedef std::function<void()> Task;
 
 public:
+    /// @brief 是否在是当前线程的eventloop对象
+    /// @return bool
     bool isInLoopThread();
 
     /// @brief 开启事件循环
@@ -49,6 +51,9 @@ public:
     /// @brief 删除事件
     /// @param event
     void delEpollEvent(FdEvent *event);
+
+public:
+    static EventLoop *GetCurrentEventLoop();
 
 private:
     /// @brief 创建eventfd

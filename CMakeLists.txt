@@ -49,6 +49,7 @@ set(SOURCE_FILE_NET
 
 	${PROJECT_SOURCE_DIR}/src/net/tcp/tcp_buffer.cc
 	${PROJECT_SOURCE_DIR}/src/net/tcp/tcp_acceptor.cc
+	${PROJECT_SOURCE_DIR}/src/net/tcp/tcp_server.cc
 	${PROJECT_SOURCE_DIR}/src/net/tcp/net_addr.cc
 
 )

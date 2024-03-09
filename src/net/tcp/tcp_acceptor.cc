@@ -27,10 +27,12 @@ TcpAcceptor::TcpAcceptor(NetAddr::s_ptr addr)
     }
 
     int val = 1;
-    // SO_REUSEADDR: 地址复用; SOCK_NONBLOCK: 非阻塞模式
-    if (setsockopt(m_listenfd, SOL_SOCKET, SO_REUSEADDR | SOCK_NONBLOCK, &val, sizeof(val)) != 0) {
+    // SO_REUSEADDR: 地址复用;
+    if (setsockopt(m_listenfd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val)) != 0) {
         LOG_ERROR << "setsockopt error, error info: " << strerror(errno);
     }
+
+    setNonBlocking(m_listenfd);
 
     // bind
     socklen_t len = m_addr->getSocketLen();
@@ -48,14 +50,21 @@ TcpAcceptor::~TcpAcceptor()
 {
 }
 
+int TcpAcceptor::getListenFd()
+{
+    return m_listenfd;
+}
+
 int TcpAcceptor::accept()
 {
+    int client_fd = 0;
+    // ipv4
     if (m_family == AF_INET) {
         sockaddr_in client_addr;
         memset(&client_addr, 0, sizeof(client_addr));
         socklen_t client_addr_len = sizeof(client_addr);
 
-        int client_fd = ::accept(m_listenfd, reinterpret_cast<sockaddr *>(&client_addr), &client_addr_len);
+        client_fd = ::accept(m_listenfd, reinterpret_cast<sockaddr *>(&client_addr), &client_addr_len);
         if (client_fd < 0) {
             LOG_ERROR << "accept error: error info: " << strerror(errno);
         }
@@ -63,10 +72,29 @@ int TcpAcceptor::accept()
         IPNetAddr peer_addr(client_addr);
 
         LOG_INFO << "a client have accepted success, peer addr: " << peer_addr.toString();
-        return client_fd;
     } else {
         // TODO: 其他协议
     }
+    return client_fd;
+}
+
+int TcpAcceptor::setNonBlocking(int fd)
+{
+    int flags = fcntl(fd, F_GETFL, 0);
+    if (flags == -1) {
+        // 获取套接字属性失败
+        LOG_ERROR << "setNonBlocking get socket flag failed: " << strerror(errno);
+        return -1;
+    }
+
+    flags |= O_NONBLOCK;// 添加非阻塞标志
+    if (fcntl(fd, F_SETFL, flags) == -1) {
+        // 设置套接字属性失败
+        LOG_ERROR << "setNonBlocking set socket O_NONBLOCK failed: " << strerror(errno);
+        return -1;
+    }
+
+    return 0;
 }
 
 }// namespace mrpc

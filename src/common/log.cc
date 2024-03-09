@@ -37,10 +37,10 @@ std::string LogLevelToString(LogLevel level)
             return "DEBUG";
             break;
         case INFO:
-            return "INFO";
+            return "INFO ";
             break;
         case WARNING:
-            return "WARNING";
+            return "WARNI";
             break;
         case ERROR:
             return "ERROR";
@@ -158,13 +158,14 @@ LogStream &Logging::stream()
     m_stream << levelToColor(m_level) << "[" << LogLevelToString(m_level) << "]" << CLR_CLR
              << "[" << time_str << "]"
              << "[" << m_pid << ":" << m_thread_id << "]"
-             << "[" << m_file_name << ":" << m_file_line << "]-";
+             << "[" << m_file_name << ":" << m_file_line << "] - " << levelToColor(m_level);
 
     return m_stream;
 }
 
 Logging::~Logging()
 {
+    m_stream << CLR_CLR;
     m_stream << "\n";
 
     // 输出到 stdout
