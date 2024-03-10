@@ -37,6 +37,9 @@ public:
     /// @param fd
     void setFd(int fd) { m_fd = fd; }
 
+    void setNonBlocking();
+
+
     /// @brief 获取epoll_event
     /// @return m_listen_events
     epoll_event getEpollEvent() const { return m_listen_events; }

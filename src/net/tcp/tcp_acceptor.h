@@ -17,7 +17,6 @@ public:
 
     int accept();
     int getListenFd();
-    int setNonBlocking(int fd);
 
 private:
     NetAddr::s_ptr m_addr;// 服务器监听地址

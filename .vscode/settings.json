@@ -72,6 +72,7 @@
 		"netfwd": "cpp",
 		"socket": "cpp",
 		"timer": "cpp",
-		"future": "cpp"
+		"future": "cpp",
+		"shared_mutex": "cpp"
 	}
 }

@@ -1,5 +1,9 @@
 #include "src/net/fd_event.h"
+#include "src/common/log.h"
+#include <fcntl.h>
 #include <string.h>
+#include <unistd.h>
+
 
 namespace mrpc
 {
@@ -38,6 +42,24 @@ void FdEvent::listen(TriggerEvent event_type, std::function<void()> callback)
     }
 
     m_listen_events.data.ptr = this;
+}
+
+void FdEvent::setNonBlocking()
+{
+    int flags = fcntl(m_fd, F_GETFL, 0);
+    if (flags & O_NONBLOCK) return;
+    if (flags == -1) {
+        // 获取套接字属性失败
+        LOG_ERROR << "setNonBlocking get socket flag failed: " << strerror(errno);
+        return;
+    }
+
+    flags |= O_NONBLOCK;// 添加非阻塞标志
+    if (fcntl(m_fd, F_SETFL, flags) == -1) {
+        // 设置套接字属性失败
+        LOG_ERROR << "setNonBlocking set socket O_NONBLOCK failed: " << strerror(errno);
+        return;
+    }
 }
 
 

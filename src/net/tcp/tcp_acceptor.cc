@@ -32,8 +32,6 @@ TcpAcceptor::TcpAcceptor(NetAddr::s_ptr addr)
         LOG_ERROR << "setsockopt error, error info: " << strerror(errno);
     }
 
-    setNonBlocking(m_listenfd);
-
     // bind
     socklen_t len = m_addr->getSocketLen();
     if (bind(m_listenfd, m_addr->getSockAddr(), len) != 0) {
@@ -78,23 +76,6 @@ int TcpAcceptor::accept()
     return client_fd;
 }
 
-int TcpAcceptor::setNonBlocking(int fd)
-{
-    int flags = fcntl(fd, F_GETFL, 0);
-    if (flags == -1) {
-        // 获取套接字属性失败
-        LOG_ERROR << "setNonBlocking get socket flag failed: " << strerror(errno);
-        return -1;
-    }
 
-    flags |= O_NONBLOCK;// 添加非阻塞标志
-    if (fcntl(fd, F_SETFL, flags) == -1) {
-        // 设置套接字属性失败
-        LOG_ERROR << "setNonBlocking set socket O_NONBLOCK failed: " << strerror(errno);
-        return -1;
-    }
-
-    return 0;
-}
 
 }// namespace mrpc

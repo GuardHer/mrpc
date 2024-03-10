@@ -36,6 +36,11 @@ int TcpBuffer::writeIndex()
     return m_write_index;
 }
 
+size_t TcpBuffer::getBufferSize() const
+{
+    return m_buffer.size();
+}
+
 void TcpBuffer::wirteToBuffer(const char *buf, int size)
 {
     // 检查 sizeof buf < size, 如果满足, 就写入全部buf, 反之写入size
@@ -47,7 +52,7 @@ void TcpBuffer::wirteToBuffer(const char *buf, int size)
         resizeBuffer(new_size);
     }
     memcpy(&m_buffer[m_write_index], buf, write_size);
-    m_write_index += write_size;
+    moveWriteIndex(write_size);
 }
 
 void TcpBuffer::readFromBuffer(std::vector<char> &re, int size)
@@ -61,9 +66,35 @@ void TcpBuffer::readFromBuffer(std::vector<char> &re, int size)
     memcpy(&tmp[0], &m_buffer[m_read_index], read_size);
 
     re.swap(tmp);
-    m_read_index += read_size;
+    moveReadIndex(read_size);
+}
 
-    adjustBuffer();
+std::string TcpBuffer::readAsString(int size)
+{
+    std::vector<char> tmp;
+    readFromBuffer(tmp, size);
+
+    std::string res(tmp.begin(), tmp.end());
+
+    return res;
+}
+
+std::string TcpBuffer::readAllAsString()
+{
+    return readAsString(readAble());
+}
+
+std::string TcpBuffer::peekAsString(int size)
+{
+    if (readAble() == 0) return;
+
+    // 如果 可读的字节数 > 需要读的, 就读size, 反之读readAble()
+    int read_size = readAble() > size ? size : readAble();
+
+    std::string tmp;
+    memcpy(&tmp[0], &m_buffer[m_read_index], read_size);
+
+    return tmp;
 }
 
 void TcpBuffer::resizeBuffer(int new_size)
