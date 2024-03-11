@@ -14,13 +14,15 @@
     epoll_event tmp = event->getEpollEvent();                                                                  \
     int ret = epoll_ctl(m_epoll_fd, op, event->getFd(), &tmp);                                                 \
     if (ret < 0) {                                                                                             \
+        LOG_ERROR << "op: " << op;                                                                             \
         LOG_ERROR << "failed epoll_ctl when add fd " << event->getFd() << ", error info: " << strerror(errno); \
     }                                                                                                          \
+    m_listen_fds.insert(event->getFd());                                                                       \
     LOG_DEBUG << "add event success! fd: " << event->getFd();
 
 #define DEL_TO_EPOLL()                                                                                         \
     auto it = m_listen_fds.find(event->getFd());                                                               \
-    if (it != m_listen_fds.end()) {                                                                            \
+    if (it == m_listen_fds.end()) {                                                                            \
         return;                                                                                                \
     }                                                                                                          \
     int op = EPOLL_CTL_DEL;                                                                                    \
@@ -29,6 +31,7 @@
     if (ret < 0) {                                                                                             \
         LOG_ERROR << "failed epoll_ctl when del fd " << event->getFd() << ", error info: " << strerror(errno); \
     }                                                                                                          \
+    m_listen_fds.erase(event->getFd());                                                                        \
     LOG_DEBUG << "del event success! fd: " << event->getFd();
 
 
@@ -134,6 +137,7 @@ void EventLoop::addTask(Task cb, bool is_wake_up /* = false */)
         ScopeMutex<Mutex> lock(m_mutex);
         m_pending_tasks.push(std::move(cb));
     }
+
 
     if (is_wake_up) {
         // 唤醒epoll_wait

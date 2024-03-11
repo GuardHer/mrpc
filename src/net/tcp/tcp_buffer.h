@@ -36,6 +36,11 @@ public:
     /// @param size 写入长度
     void wirteToBuffer(const char *buf, int size);
 
+    /// @brief 写入m_buffer
+    /// @param buf
+    /// @param size
+    void wirteToBuffer(const std::string &buf);
+
     /// @brief 从 m_buffer 中读 size 长度的数据到 re
     /// @param re 写入的数组
     /// @param size 长度

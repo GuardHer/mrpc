@@ -53,8 +53,9 @@ int TcpAcceptor::getListenFd()
     return m_listenfd;
 }
 
-int TcpAcceptor::accept()
+std::pair<int, NetAddr::s_ptr> TcpAcceptor::accept()
 {
+    std::pair<int, NetAddr::s_ptr> res;
     int client_fd = 0;
     // ipv4
     if (m_family == AF_INET) {
@@ -67,15 +68,16 @@ int TcpAcceptor::accept()
             LOG_ERROR << "accept error: error info: " << strerror(errno);
         }
 
-        IPNetAddr peer_addr(client_addr);
+        IPNetAddr::s_ptr peer_addr = std::make_shared<IPNetAddr>(client_addr);
+        res.second = peer_addr;
 
-        LOG_INFO << "a client have accepted success, peer addr: " << peer_addr.toString();
+        LOG_INFO << "a client have accepted success, peer addr: " << peer_addr->toString();
     } else {
         // TODO: 其他协议
     }
-    return client_fd;
+    res.first = client_fd;
+    return res;
 }
-
 
 
 }// namespace mrpc

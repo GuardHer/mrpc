@@ -1,9 +1,11 @@
 #ifndef MRPC_NET_TCP_TCP_CONNECTION_H
 #define MRPC_NET_TCP_TCP_CONNECTION_H
 
+#include "src/net/eventloop.h"
 #include "src/net/io_thread.h"
 #include "src/net/tcp/net_addr.h"
 #include "src/net/tcp/tcp_buffer.h"
+#include <memory>
 
 namespace mrpc
 {
@@ -18,6 +20,8 @@ enum ConnState
 class TcpConnection
 {
 public:
+    typedef std::shared_ptr<TcpConnection> s_ptr;
+
 public:
     TcpConnection(IOThread *io_thread, int fd, int buffer_size, NetAddr::s_ptr peer_addr);
     ~TcpConnection();
@@ -30,6 +34,12 @@ public:
     /// @brief 可写事件函数
     void onWrite();
 
+    /// @brief
+    void clear();
+
+    /// @brief 服务器主动关闭连接
+    void shutdown();
+
     /// @brief 设置 m_state
     /// @param state
     void setState(const ConnState &state) { m_state = state; }
@@ -38,14 +48,15 @@ public:
     ConnState getState() const { return m_state; }
 
 private:
-    NetAddr::s_ptr m_addr;         //
-    NetAddr::s_ptr m_peer_addr;    //
-    TcpBuffer::s_ptr m_in_buffer;  // 接收缓冲区
-    TcpBuffer::s_ptr m_out_buffer; // 发送缓冲区
-    IOThread *m_io_thread{nullptr};// 持有该连接的io线程
-    FdEvent *m_fd_event{nullptr};  //
-    ConnState m_state;             //
-    int m_fd{-1};                  //
+    IOThread *m_io_thread{nullptr};         // 持有该连接的io线程
+    NetAddr::s_ptr m_addr;                  //
+    NetAddr::s_ptr m_peer_addr;             //
+    TcpBuffer::s_ptr m_in_buffer;           // 接收缓冲区
+    TcpBuffer::s_ptr m_out_buffer;          // 发送缓冲区
+    FdEvent *m_fd_event{nullptr};           //
+    ConnState m_state{ConnState::Connected};//
+    int m_fd{-1};                           //
+    EventLoop *m_event_loop{nullptr};
 };
 
 }// namespace mrpc

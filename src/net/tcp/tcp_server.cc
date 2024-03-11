@@ -1,5 +1,7 @@
 #include "src/net/tcp/tcp_server.h"
 #include "src/common/log.h"
+#include "src/net/tcp/tcp_connection.h"
+
 
 namespace mrpc
 {
@@ -49,13 +51,17 @@ void TcpServer::start()
 
 void TcpServer::onAccept()
 {
-    int client_fd = m_acceptor->accept();
+    auto re = m_acceptor->accept();
+    auto client_fd = re.first;
+    auto peer_addr = re.second;
     //FdEvent client_fd_event(client_fd);
     m_client_counts++;
 
     // TODO: 把clientfd添加到 IO 线程
-    //m_io_threads->getIOThread()->getEventLoop()->addEpollEvent();
-
+    IOThread *io_thread = m_io_threads->getIOThread();
+    TcpConnection::s_ptr conn = std::make_shared<TcpConnection>(io_thread, client_fd, 1024, peer_addr);
+    conn->setState(ConnState::Connected);
+	m_clients.insert(conn);
     LOG_INFO << "TcpServer succ get client, fd: " << client_fd << ", all client count: " << m_client_counts;
 }
 

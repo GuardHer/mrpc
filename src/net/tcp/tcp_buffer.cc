@@ -1,6 +1,7 @@
 #include "src/net/tcp/tcp_buffer.h"
 #include "src/common/log.h"
 
+#include <cstring>
 #include <string.h>
 
 namespace mrpc
@@ -23,7 +24,7 @@ int TcpBuffer::readAble()
 
 int TcpBuffer::wirteAble()
 {
-    return m_size - m_write_index;
+    return int(m_buffer.size()) - m_write_index;
 }
 
 int TcpBuffer::readIndex()
@@ -44,7 +45,7 @@ size_t TcpBuffer::getBufferSize() const
 void TcpBuffer::wirteToBuffer(const char *buf, int size)
 {
     // 检查 sizeof buf < size, 如果满足, 就写入全部buf, 反之写入size
-    int write_size = sizeof(buf) < size ? sizeof(buf) : size;
+    int write_size = int(std::strlen(buf)) < size ? int(std::strlen(buf)) : size;
 
     if (write_size > wirteAble()) {
         // 扩容 m_buffer
@@ -54,6 +55,12 @@ void TcpBuffer::wirteToBuffer(const char *buf, int size)
     memcpy(&m_buffer[m_write_index], buf, write_size);
     moveWriteIndex(write_size);
 }
+
+void TcpBuffer::wirteToBuffer(const std::string &buf)
+{
+    wirteToBuffer(buf.c_str(), buf.length());
+}
+
 
 void TcpBuffer::readFromBuffer(std::vector<char> &re, int size)
 {
@@ -86,13 +93,13 @@ std::string TcpBuffer::readAllAsString()
 
 std::string TcpBuffer::peekAsString(int size)
 {
-    if (readAble() == 0) return;
+    if (readAble() == 0) return std::string();
 
     // 如果 可读的字节数 > 需要读的, 就读size, 反之读readAble()
     int read_size = readAble() > size ? size : readAble();
 
     std::string tmp;
-    memcpy(&tmp[0], &m_buffer[m_read_index], read_size);
+    tmp.assign(&m_buffer[m_read_index], read_size);
 
     return tmp;
 }
@@ -126,7 +133,7 @@ void TcpBuffer::adjustBuffer()
 void TcpBuffer::moveReadIndex(int size)
 {
     int j = m_read_index + size;
-    if (j >= m_buffer.size()) {
+    if (j >= int(m_buffer.size())) {
         LOG_ERROR << "moveReadIndex error, invalid size";
         return;
     }
@@ -138,7 +145,7 @@ void TcpBuffer::moveReadIndex(int size)
 void TcpBuffer::moveWriteIndex(int size)
 {
     int j = m_write_index + size;
-    if (j >= m_buffer.size()) {
+    if (j >= int(m_buffer.size())) {
         LOG_ERROR << "moveWriteIndex error, invalid size";
         return;
     }

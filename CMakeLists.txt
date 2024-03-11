@@ -41,6 +41,7 @@ set(SOURCE_FILE_COMMON
 set(SOURCE_FILE_NET
 	${PROJECT_SOURCE_DIR}/src/net/eventloop.cc
 	${PROJECT_SOURCE_DIR}/src/net/fd_event.cc
+	${PROJECT_SOURCE_DIR}/src/net/fd_event_group.cc
 	${PROJECT_SOURCE_DIR}/src/net/wakeup_fd_event.cc
 	${PROJECT_SOURCE_DIR}/src/net/timer.cc
 	${PROJECT_SOURCE_DIR}/src/net/timer_event.cc
@@ -50,6 +51,7 @@ set(SOURCE_FILE_NET
 	${PROJECT_SOURCE_DIR}/src/net/tcp/tcp_buffer.cc
 	${PROJECT_SOURCE_DIR}/src/net/tcp/tcp_acceptor.cc
 	${PROJECT_SOURCE_DIR}/src/net/tcp/tcp_server.cc
+	${PROJECT_SOURCE_DIR}/src/net/tcp/tcp_connection.cc
 	${PROJECT_SOURCE_DIR}/src/net/tcp/net_addr.cc
 
 )
@@ -97,3 +99,11 @@ add_executable(tcp_test
 	${PROJECT_SOURCE_DIR}/test/test_tcp.cc
 )
 target_link_libraries(tcp_test ${LIBS})
+
+# test_client
+add_executable(client_test
+	${SOURCE_FILE_COMMON} 
+	${SOURCE_FILE_NET}
+	${PROJECT_SOURCE_DIR}/test/test_client.cc
+)
+target_link_libraries(client_test ${LIBS})

@@ -29,6 +29,10 @@ public:
     /// @param callback
     void listen(TriggerEvent event_type, std::function<void()> callback);
 
+    /// @brief 取消监听
+    /// @param event_type
+    void cancle(TriggerEvent event_type);
+
     /// @brief 获取fd
     /// @return  m_fd
     int getFd() const { return m_fd; }
@@ -37,8 +41,8 @@ public:
     /// @param fd
     void setFd(int fd) { m_fd = fd; }
 
+    /// @brief 设置非阻塞
     void setNonBlocking();
-
 
     /// @brief 获取epoll_event
     /// @return m_listen_events
@@ -54,11 +58,11 @@ public:
 
     /// @brief 获取读回调函数
     /// @return m_read_callback
-    std::function<void()> getReadCollback() { return m_read_callback; }
+    std::function<void()> getReadCollback() const { return m_read_callback; }
 
     /// @brief 获取写回到函数
     /// @return m_write_callback
-    std::function<void()> getWriteCollback() { return m_write_callback; }
+    std::function<void()> getWriteCollback() const { return m_write_callback; }
 
 
 private:

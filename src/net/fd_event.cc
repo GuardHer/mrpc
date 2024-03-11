@@ -44,6 +44,17 @@ void FdEvent::listen(TriggerEvent event_type, std::function<void()> callback)
     m_listen_events.data.ptr = this;
 }
 
+void FdEvent::cancle(TriggerEvent event_type)
+{
+    if (event_type == TriggerEvent::EVENT_IN) {
+        if (m_listen_events.events & EPOLLIN)
+            m_listen_events.events &= (~EPOLLIN);
+    } else {
+        if (m_listen_events.events & EPOLLOUT)
+            m_listen_events.events &= (~EPOLLOUT);
+    }
+}
+
 void FdEvent::setNonBlocking()
 {
     int flags = fcntl(m_fd, F_GETFL, 0);

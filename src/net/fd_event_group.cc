@@ -26,7 +26,7 @@ FdEventGroup::~FdEventGroup()
 FdEvent *FdEventGroup::getFdEvent(int fd)
 {
     ScopeMutex<Mutex> lock(m_mutex);
-    if (fd < m_fd_groups.size()) {
+    if (fd < int(m_fd_groups.size())) {
         return m_fd_groups[fd];
     }
 

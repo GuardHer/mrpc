@@ -4,6 +4,9 @@
 #include "src/net/eventloop.h"
 #include "src/net/io_thread_pool.h"
 #include "src/net/tcp/tcp_acceptor.h"
+#include "src/net/tcp/tcp_connection.h"
+
+#include <set>
 
 namespace mrpc
 {
@@ -28,6 +31,8 @@ private:
     EventLoop *m_main_event_loop{nullptr};// main reactor
     IOThreadPool *m_io_threads{nullptr};  // subReactors
     int m_client_counts{0};
+
+    std::set<TcpConnection::s_ptr> m_clients;
 };
 
 
