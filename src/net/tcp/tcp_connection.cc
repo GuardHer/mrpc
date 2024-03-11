@@ -7,12 +7,11 @@
 namespace mrpc
 {
 
-TcpConnection::TcpConnection(IOThread *io_thread, int fd, int buffer_size, NetAddr::s_ptr peer_addr)
-    : m_io_thread(io_thread), m_peer_addr(peer_addr), m_state(ConnState::NotConnected), m_fd(fd)
+TcpConnection::TcpConnection(EventLoop *event_loop, int fd, int buffer_size, NetAddr::s_ptr peer_addr)
+    : m_event_loop(event_loop), m_peer_addr(peer_addr), m_state(ConnState::NotConnected), m_fd(fd)
 {
     m_in_buffer = std::make_shared<TcpBuffer>(buffer_size);
     m_out_buffer = std::make_shared<TcpBuffer>(buffer_size);
-    m_event_loop = io_thread->getEventLoop();
 
     // 获取 m_fd_event
     m_fd_event = FdEventGroup::GetFdEventGroup()->getFdEvent(fd);
@@ -99,11 +98,7 @@ void TcpConnection::excute()
     int size = m_in_buffer->readAble();
     tmp = m_in_buffer->readAsString(size);
 
-
-    LOG_INFO << "success get request: " << tmp << ", size: " << size << " , form client addr: " << m_peer_addr->toString();
-
     m_out_buffer->wirteToBuffer(tmp);
-
     m_fd_event->listen(FdEvent::EVENT_OUT, std::bind(&TcpConnection::onWrite, this));
     m_event_loop->addEpollEvent(m_fd_event);
 }

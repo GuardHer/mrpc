@@ -52,6 +52,8 @@ public:
     /// @param event
     void delEpollEvent(FdEvent *event);
 
+    bool isLooping() const { return m_is_looping; };
+
 public:
     static EventLoop *GetCurrentEventLoop();
 
@@ -72,6 +74,7 @@ private:
     int m_wakeup_fd{0};              // wake_fd
     WakeUpFdEvent *m_wakeup_fd_event;// wake_fd_event
     bool m_stop_flag{false};         // 是否停止
+    bool m_is_looping{false};        // 是否停止
     std::set<int> m_listen_fds;      // 监听套接字集合 (wake_fd, client_fd, timer_fd)
     std::queue<Task> m_pending_tasks;// 任务队列 (需要mutex)
     Mutex m_mutex;                   // 互斥锁

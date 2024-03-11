@@ -1,6 +1,7 @@
 #include "src/common/config.h"
 #include "src/common/log.h"
 #include "src/net/tcp/net_addr.h"
+#include "src/net/tcp/tcp_client.h"
 #include "src/net/tcp/tcp_connection.h"
 #include "src/net/tcp/tcp_server.h"
 
@@ -47,16 +48,30 @@ void test_tcp_connection()
     LOG_DEBUG << "read: " << buf << ", size: " << rt;
 }
 
+void test_tcp_client()
+{
+    using namespace mrpc;
+
+    IPNetAddr::s_ptr addr = std::make_shared<IPNetAddr>("127.0.0.1", 12345);
+
+    TcpClient cli(addr);
+
+    cli.connect([]() {
+        LOG_DEBUG << "connect to success!";
+    });
+
+}
+
 int main()
 {
     mrpc::Config::SetGlobalConfig("../conf/mrpc.xml");
     mrpc::Logger::InitGlobalLogger();
 
-    // tcp server
-    for (int i = 0; i < 10000; i++) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));// ms
-        test_tcp_connection();
-    }
+    // tcp connection
+    //test_tcp_connection();
+
+    // tcp client
+    test_tcp_client();
 
     return 0;
 }

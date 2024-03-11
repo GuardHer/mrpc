@@ -86,6 +86,7 @@ EventLoop::~EventLoop()
 
 void EventLoop::loop()
 {
+    m_is_looping = true;
     while (!m_stop_flag) {
         ScopeMutex<Mutex> lock(m_mutex);
         std::queue<Task> tmp_tasks;

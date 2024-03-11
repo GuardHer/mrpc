@@ -9,6 +9,7 @@
 
 namespace mrpc
 {
+
 enum ConnState
 {
     NotConnected = 1,
@@ -17,13 +18,19 @@ enum ConnState
     Closed = 3,
 };
 
+enum ConnType
+{
+    ConnByServer = 1,// server
+    ConnByClient = 2,// client
+};
+
 class TcpConnection
 {
 public:
     typedef std::shared_ptr<TcpConnection> s_ptr;
 
 public:
-    TcpConnection(IOThread *io_thread, int fd, int buffer_size, NetAddr::s_ptr peer_addr);
+    TcpConnection(EventLoop *event_loop, int fd, int buffer_size, NetAddr::s_ptr peer_addr);
     ~TcpConnection();
 
 public:
@@ -43,12 +50,22 @@ public:
     /// @brief 设置 m_state
     /// @param state
     void setState(const ConnState &state) { m_state = state; }
+
     /// @brief 获取 m_state
     /// @return m_state
     ConnState getState() const { return m_state; }
 
+    /// @brief 设置 m_conn_type
+    /// @param state
+    void setConnType(const ConnType &type) { m_conn_type = type; }
+
+    /// @brief 获取 m_conn_type
+    /// @return m_conn_type
+    ConnType getConnType() const { return m_conn_type; }
+
+
 private:
-    IOThread *m_io_thread{nullptr};         // 持有该连接的io线程
+    EventLoop *m_event_loop{nullptr};
     NetAddr::s_ptr m_addr;                  //
     NetAddr::s_ptr m_peer_addr;             //
     TcpBuffer::s_ptr m_in_buffer;           // 接收缓冲区
@@ -56,7 +73,7 @@ private:
     FdEvent *m_fd_event{nullptr};           //
     ConnState m_state{ConnState::Connected};//
     int m_fd{-1};                           //
-    EventLoop *m_event_loop{nullptr};
+    ConnType m_conn_type{ConnType::ConnByServer};
 };
 
 }// namespace mrpc
