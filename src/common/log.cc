@@ -2,6 +2,9 @@
 #include "src/common/log.h"
 #include "src/common/config.h"
 
+#if __cplusplus >= 201703L
+#include <filesystem>
+#endif
 #include <sstream>
 #include <stdio.h>
 #include <sys/time.h>
@@ -95,11 +98,18 @@ LogLevel StringToLogLevel(const std::string &string_level)
 }
 std::string extractFileName(const std::string &absolutePath)
 {
+
+#if __cplusplus >= 201703L
+
+    std::filesystem::path p(absolutePath);
+    return p.filename().string();
+#else
     size_t lastSlash = absolutePath.find_last_of("/\\");
     if (lastSlash != std::string::npos) {
         return absolutePath.substr(lastSlash + 1);
     }
     return absolutePath;
+#endif
 }
 
 Logger::~Logger()

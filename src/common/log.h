@@ -6,6 +6,9 @@
 #include "src/common/util.h"
 #include <memory>
 #include <queue>
+#if __cplusplus >= 202002L
+#include <source_location>// std::source_location
+#endif
 #include <string>
 
 namespace mrpc
@@ -79,10 +82,12 @@ private:
 class Logging
 {
 public:
-    Logging(LogLevel level) : m_level(level) {}
+#if __cplusplus >= 202002L
+    Logging(LogLevel level, const std::source_location &loc = std::source_location::current())
+        : m_level(level), m_file_name(extractFileName(loc.file_name())), m_func_name(loc.function_name()), m_file_line(loc.line()), m_thread_id(getThreadId()), m_pid(getPid()){};
+#endif
     Logging(const char *file, int line, LogLevel level, const char *func)
-        : m_file_name(extractFileName(std::string(file))), m_func_name(std::string(func)), m_file_line(line), m_level(level), m_thread_id(getThreadId()), m_pid(getPid()) {}
-
+        : m_level(level), m_file_name(extractFileName(std::string(file))), m_func_name(std::string(func)), m_file_line(line), m_thread_id(getThreadId()), m_pid(getPid()) {}
     ~Logging();
 
 public:
@@ -99,15 +104,33 @@ public:
     LogStream &stream();
 
 private:
-    std::string m_file_name;// 文件名
-    std::string m_func_name;// 函数名
-    int m_file_line;        // 行号
-    LogLevel m_level;       // 日志级别
-    int32_t m_thread_id;    // 线程id
-    int32_t m_pid;          // 进程id
-    LogStream m_stream;     // 日志流
+    LogLevel m_level{LogLevel::UNKNOWN};// 日志级别
+    std::string m_file_name;            // 文件名
+    std::string m_func_name;            // 函数名
+    int m_file_line{-1};                // 行号
+    int32_t m_thread_id{-1};            // 线程id
+    int32_t m_pid{-1};                  // 进程id
+    LogStream m_stream;                 // 日志流
 };
 
+#if __cplusplus >= 202002L
+#define LOG_DEBUG                                                                \
+    if (mrpc::Logger::GetGlobalLogger()->getLogLevel() <= mrpc::LogLevel::DEBUG) \
+    mrpc::Logging(mrpc::LogLevel::DEBUG).stream()
+#define LOG_INFO                                                                \
+    if (mrpc::Logger::GetGlobalLogger()->getLogLevel() <= mrpc::LogLevel::INFO) \
+    mrpc::Logging(mrpc::LogLevel::INFO).stream()
+#define LOG_WARNING                                                                \
+    if (mrpc::Logger::GetGlobalLogger()->getLogLevel() <= mrpc::LogLevel::WARNING) \
+    mrpc::Logging(mrpc::LogLevel::WARNING).stream()
+#define LOG_ERROR                                                                \
+    if (mrpc::Logger::GetGlobalLogger()->getLogLevel() <= mrpc::LogLevel::ERROR) \
+    mrpc::Logging(mrpc::LogLevel::ERROR).stream()
+#define LOG_FATAL                                                                \
+    if (mrpc::Logger::GetGlobalLogger()->getLogLevel() <= mrpc::LogLevel::FATAL) \
+    mrpc::Logging(mrpc::LogLevel::FATAL).stream()
+
+#else
 #define LOG_DEBUG                                                                \
     if (mrpc::Logger::GetGlobalLogger()->getLogLevel() <= mrpc::LogLevel::DEBUG) \
     mrpc::Logging(__FILE__, __LINE__, mrpc::LogLevel::DEBUG, __func__).stream()
@@ -123,6 +146,7 @@ private:
 #define LOG_FATAL                                                                \
     if (mrpc::Logger::GetGlobalLogger()->getLogLevel() <= mrpc::LogLevel::FATAL) \
     mrpc::Logging(__FILE__, __LINE__, mrpc::LogLevel::FATAL, __func__).stream()
+#endif
 
 }// namespace mrpc
 

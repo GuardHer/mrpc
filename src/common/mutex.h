@@ -48,6 +48,7 @@ private:
     bool m_is_lock{false};
 };
 
+// 互斥锁
 class Mutex
 {
 public:
@@ -73,6 +74,39 @@ public:
 
 private:
     pthread_mutex_t m_mutex;
+};
+
+// 读写锁
+class RWLock
+{
+public:
+    RWLock()
+    {
+        pthread_rwlock_init(&m_lock, nullptr);
+    }
+
+    ~RWLock()
+    {
+        pthread_rwlock_destroy(&m_lock);
+    }
+
+    void readLock()
+    {
+        pthread_rwlock_rdlock(&m_lock);
+    }
+
+    void writeLock()
+    {
+        pthread_rwlock_wrlock(&m_lock);
+    }
+
+    void unlock()
+    {
+        pthread_rwlock_unlock(&m_lock);
+    }
+
+private:
+    pthread_rwlock_t m_lock;
 };
 
 }// namespace mrpc

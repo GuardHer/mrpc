@@ -73,6 +73,9 @@
 		"socket": "cpp",
 		"timer": "cpp",
 		"future": "cpp",
-		"shared_mutex": "cpp"
+		"shared_mutex": "cpp",
+		"source_location": "cpp",
+		"codecvt": "cpp",
+		"iomanip": "cpp"
 	}
 }
