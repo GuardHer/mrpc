@@ -1,6 +1,8 @@
 #include "src/common/config.h"
 #include "src/common/log.h"
+#include "src/net/tcp/abstract_protocol.h"
 #include "src/net/tcp/net_addr.h"
+#include "src/net/tcp/string_coder.h"
 #include "src/net/tcp/tcp_client.h"
 #include "src/net/tcp/tcp_connection.h"
 #include "src/net/tcp/tcp_server.h"
@@ -56,10 +58,23 @@ void test_tcp_client()
 
     TcpClient cli(addr);
 
-    cli.connect([]() {
-        LOG_DEBUG << "connect to success!";
-    });
+    auto conn_fun = [&cli](const TcpConnectionPtr &conn) {
+        LOG_INFO << conn->getState() << ", conn_fun conn success!";
 
+        std::shared_ptr<StringProtocol> message = std::make_shared<StringProtocol>();
+        message->info = "Hello!";
+        message->setReqId("123456");
+
+        cli.writeMessage(message);
+    };
+    auto write_fun = [&cli](const AbstractProtocolPtr &message) {
+        LOG_INFO << "write_fun!";
+    };
+
+    cli.setWriteCompleteCallBack(write_fun);
+    cli.setConnectionCallBack(conn_fun);
+
+    cli.connect();
 }
 
 int main()

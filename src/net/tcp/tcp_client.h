@@ -4,7 +4,10 @@
 #include "src/net/eventloop.h"
 #include "src/net/tcp/abstract_protocol.h"
 #include "src/net/tcp/net_addr.h"
+#include "src/net/tcp/tcp_buffer.h"
 #include "src/net/tcp/tcp_connection.h"
+
+#include "src/net/callback.h"
 
 namespace mrpc
 {
@@ -12,18 +15,25 @@ namespace mrpc
 class TcpClient
 {
 public:
+    //AbstractProtocol::s_ptr
+
+public:
     TcpClient(NetAddr::s_ptr peer_addr);
     ~TcpClient();
 
     /// @brief 如果 connect 成功, done 会被执行
-    void connect(std::function<void()> done);
+    void connect();
 
     /// @brief 发送 message 成功, done 会被执行
-    void writeMessage(AbstractProtocol::s_ptr message, std::function<void(AbstractProtocol::s_ptr)> done);
+    void writeMessage(AbstractProtocol::s_ptr message);
 
     /// @brief 发送 message 成功, done 会被执行
-    void readMessage(AbstractProtocol::s_ptr message, std::function<void(AbstractProtocol::s_ptr)> done);
+    void readMessage(AbstractProtocol::s_ptr message);
 
+    void setConnectionCallBack(const ConnectionCallback &cb) { m_conn_callback = cb; }
+    void setCloseCallBack(const CloseCallback &cb) { m_close_callback = cb; }
+    void setWriteCompleteCallBack(const WriteCompleteCallback &cb) { m_write_complete_callback = cb; }
+    void setMessageCallBack(const MessageCallback &cb) { m_message_callback = cb; }
 
 private:
     NetAddr::s_ptr m_peer_addr;
@@ -31,6 +41,11 @@ private:
     int m_fd{-1};
     FdEvent *m_fd_event{nullptr};
     TcpConnection::s_ptr m_conn;
+
+    ConnectionCallback m_conn_callback;
+    CloseCallback m_close_callback;
+    WriteCompleteCallback m_write_complete_callback;
+    MessageCallback m_message_callback;
 };
 
 }// namespace mrpc

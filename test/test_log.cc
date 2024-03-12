@@ -4,7 +4,7 @@
 #include <iostream>
 #include <pthread.h>
 #include <queue>
-
+//
 void *func(void *)
 {
     LOG_INFO << "LOG_INFO";

@@ -76,6 +76,7 @@
 		"shared_mutex": "cpp",
 		"source_location": "cpp",
 		"codecvt": "cpp",
-		"iomanip": "cpp"
+		"iomanip": "cpp",
+		"queue": "cpp"
 	}
 }

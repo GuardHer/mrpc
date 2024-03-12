@@ -1,6 +1,7 @@
 #include "src/net/tcp/tcp_connection.h"
 #include "src/common/log.h"
 #include "src/net/fd_event_group.h"
+#include "src/net/tcp/string_coder.h"
 #include <string.h>
 #include <unistd.h>
 
@@ -8,8 +9,11 @@ namespace mrpc
 {
 
 TcpConnection::TcpConnection(EventLoop *event_loop, int fd, int buffer_size, NetAddr::s_ptr peer_addr)
-    : m_event_loop(event_loop), m_peer_addr(peer_addr), m_state(ConnState::NotConnected), m_fd(fd)
+    : m_fd(fd), m_event_loop(event_loop), m_peer_addr(peer_addr), m_state(ConnState::NotConnected)
 {
+
+    m_coder = new StringCoder();
+
     m_in_buffer = std::make_shared<TcpBuffer>(buffer_size);
     m_out_buffer = std::make_shared<TcpBuffer>(buffer_size);
 
@@ -17,15 +21,17 @@ TcpConnection::TcpConnection(EventLoop *event_loop, int fd, int buffer_size, Net
     m_fd_event = FdEventGroup::GetFdEventGroup()->getFdEvent(fd);
     // 设置非阻塞
     m_fd_event->setNonBlocking();
-    // 监听读事件
-    m_fd_event->listen(FdEvent::EVENT_IN, std::bind(&TcpConnection::onRead, this));
-    //
-    m_event_loop->addEpollEvent(m_fd_event);
+
+    listenRead();
 }
 
 TcpConnection::~TcpConnection()
 {
-    LOG_DEBUG << "~TcpConnectio";
+    LOG_DEBUG << "~TcpConnection";
+    if (m_coder) {
+        delete m_coder;
+        m_coder = nullptr;
+    }
 }
 
 void TcpConnection::onRead()
@@ -33,6 +39,7 @@ void TcpConnection::onRead()
     /// 从 socket 缓冲区, 调用系统的 read 到 in_buffer
     if (m_state != ConnState::Connected) {
         LOG_ERROR << "onRead error, client has alread disconnected, cliend_fd: " << m_fd << ", addr: " << m_peer_addr->toString();
+        clear();
         return;
     }
 
@@ -99,8 +106,7 @@ void TcpConnection::excute()
     tmp = m_in_buffer->readAsString(size);
 
     m_out_buffer->wirteToBuffer(tmp);
-    m_fd_event->listen(FdEvent::EVENT_OUT, std::bind(&TcpConnection::onWrite, this));
-    m_event_loop->addEpollEvent(m_fd_event);
+    listenWrite();
 }
 
 void TcpConnection::onWrite()
@@ -108,7 +114,18 @@ void TcpConnection::onWrite()
     /// 将当前 out_buffer 里面的数据发送给client
     if (m_state != ConnState::Connected) {
         LOG_ERROR << "onWrite error, client has alread disconnected, cliend_fd: " << m_fd << ", addr: " << m_peer_addr->toString();
+        clear();
         return;
+    }
+
+    if (m_conn_type == ConnType::ConnByClient) {
+        // 将message encode 得到字节流
+        // 将字节流写入到buffer
+        std::vector<AbstractProtocol *> messages;
+        for (auto tmp: m_write_callbask) {
+            messages.push_back(tmp.first.get());
+        }
+        m_coder->encode(messages, m_out_buffer);
     }
 
     bool is_write_all = false;
@@ -139,6 +156,29 @@ void TcpConnection::onWrite()
         m_fd_event->cancle(FdEvent::EVENT_OUT);
         m_event_loop->addEpollEvent(m_fd_event);
     }
+
+    if (m_conn_type == ConnType::ConnByClient) {
+        for (auto tmp: m_write_callbask) {
+            tmp.second(tmp.first);
+        }
+        m_write_callbask.clear();
+    }
+}
+
+void TcpConnection::listenWrite()
+{
+    // 监听写事件
+    m_fd_event->listen(FdEvent::EVENT_OUT, std::bind(&TcpConnection::onWrite, this));
+    // 添加到epoll
+    m_event_loop->addEpollEvent(m_fd_event);
+}
+
+void TcpConnection::listenRead()
+{
+    // 监听读事件
+    m_fd_event->listen(FdEvent::EVENT_IN, std::bind(&TcpConnection::onRead, this));
+    // 添加到epoll
+    m_event_loop->addEpollEvent(m_fd_event);
 }
 
 void TcpConnection::clear()

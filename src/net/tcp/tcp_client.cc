@@ -33,23 +33,24 @@ TcpClient::~TcpClient()
     }
 }
 
-void TcpClient::connect(std::function<void()> done)
+void TcpClient::connect()
 {
     int rt = ::connect(m_fd, m_peer_addr->getSockAddr(), m_peer_addr->getSocketLen());
     if (rt == 0) {
         LOG_DEBUG << "connect [" << m_peer_addr->toString() << "] success!";
-        if (done) done();
+        if (m_conn_callback) m_conn_callback(m_conn);
     } else if (rt == -1) {
         if (errno == EINPROGRESS) {
             // epoll 监听可写事件, 判断错误码
-            m_fd_event->listen(FdEvent::EVENT_OUT, [this, done]() {
+            m_fd_event->listen(FdEvent::EVENT_OUT, [this]() {
                 int error = 0;
                 socklen_t error_len = sizeof(error);
                 ::getsockopt(m_fd, SOL_SOCKET, SO_ERROR, &error, &error_len);
                 if (error == 0) {
                     LOG_DEBUG << "connect [" << m_peer_addr->toString() << "] success!";
-                    if (done) done();
+                    if (m_conn_callback) m_conn_callback(m_conn);
                 } else {
+                    m_fd_event->cancle(FdEvent::EVENT_IN);
                     LOG_ERROR << "connect error: " << strerror(errno) << ", fd: " << m_fd;
                 }
                 m_fd_event->cancle(FdEvent::EVENT_OUT);
@@ -67,11 +68,14 @@ void TcpClient::connect(std::function<void()> done)
     }
 }
 
-void TcpClient::writeMessage(AbstractProtocol::s_ptr message, std::function<void(AbstractProtocol::s_ptr)> done)
+void TcpClient::writeMessage(AbstractProtocol::s_ptr message)
 {
+    // 把message对象写入到connect的buffer中, 启动connect可写事件
+    m_conn->pushWriteMessage(std::make_pair(message, m_write_complete_callback));
+    m_conn->listenWrite();
 }
 
-void TcpClient::readMessage(AbstractProtocol::s_ptr message, std::function<void(AbstractProtocol::s_ptr)> done)
+void TcpClient::readMessage(AbstractProtocol::s_ptr message)
 {
 }
 

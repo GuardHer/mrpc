@@ -1,11 +1,15 @@
 #ifndef MRPC_NET_TCP_TCP_CONNECTION_H
 #define MRPC_NET_TCP_TCP_CONNECTION_H
 
+#include "src/net/callback.h"
 #include "src/net/eventloop.h"
 #include "src/net/io_thread.h"
+#include "src/net/tcp/abstract_coder.h"
 #include "src/net/tcp/net_addr.h"
 #include "src/net/tcp/tcp_buffer.h"
 #include <memory>
+#include <queue>
+#include <vector>
 
 namespace mrpc
 {
@@ -28,6 +32,7 @@ class TcpConnection
 {
 public:
     typedef std::shared_ptr<TcpConnection> s_ptr;
+    typedef std::pair<AbstractProtocol::s_ptr, WriteCompleteCallback> write_callback_pair;
 
 public:
     TcpConnection(EventLoop *event_loop, int fd, int buffer_size, NetAddr::s_ptr peer_addr);
@@ -36,10 +41,18 @@ public:
 public:
     /// @brief 可读事件函数
     void onRead();
+
     /// @brief
     void excute();
+
     /// @brief 可写事件函数
     void onWrite();
+
+    /// @brief 启动监听可写
+    void listenWrite();
+
+    /// @brief 启动监听可读
+    void listenRead();
 
     /// @brief
     void clear();
@@ -63,17 +76,22 @@ public:
     /// @return m_conn_type
     ConnType getConnType() const { return m_conn_type; }
 
+    void pushWriteMessage(write_callback_pair cb_pair) { m_write_callbask.push_back(cb_pair); }
+
 
 private:
-    EventLoop *m_event_loop{nullptr};
-    NetAddr::s_ptr m_addr;                  //
-    NetAddr::s_ptr m_peer_addr;             //
-    TcpBuffer::s_ptr m_in_buffer;           // 接收缓冲区
-    TcpBuffer::s_ptr m_out_buffer;          // 发送缓冲区
-    FdEvent *m_fd_event{nullptr};           //
-    ConnState m_state{ConnState::Connected};//
-    int m_fd{-1};                           //
-    ConnType m_conn_type{ConnType::ConnByServer};
+    int m_fd{-1};                                // socket
+    EventLoop *m_event_loop{nullptr};            //
+    NetAddr::s_ptr m_addr;                       //
+    NetAddr::s_ptr m_peer_addr;                  //
+    TcpBuffer::s_ptr m_in_buffer;                // 接收缓冲区
+    TcpBuffer::s_ptr m_out_buffer;               // 发送缓冲区
+    FdEvent *m_fd_event{nullptr};                //
+    ConnState m_state{ConnState::Connected};     //
+    ConnType m_conn_type{ConnType::ConnByServer};//
+    AbstractCoder *m_coder{nullptr};             // 编解码
+    // std::pair<AbstractProtocol::s_ptr, std::function<AbstractProtocol::s_ptr>>;
+    std::vector<write_callback_pair> m_write_callbask;
 };
 
 }// namespace mrpc
