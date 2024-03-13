@@ -39,22 +39,29 @@ void TcpClient::connect()
     if (rt == 0) {
         LOG_DEBUG << "connect [" << m_peer_addr->toString() << "] success!";
         if (m_conn_callback) m_conn_callback(m_conn);
+        m_conn->setState(ConnState::Connected);
     } else if (rt == -1) {
         if (errno == EINPROGRESS) {
             // epoll 监听可写事件, 判断错误码
             m_fd_event->listen(FdEvent::EVENT_OUT, [this]() {
                 int error = 0;
+                bool is_conned = false;
                 socklen_t error_len = sizeof(error);
                 ::getsockopt(m_fd, SOL_SOCKET, SO_ERROR, &error, &error_len);
                 if (error == 0) {
                     LOG_DEBUG << "connect [" << m_peer_addr->toString() << "] success!";
-                    if (m_conn_callback) m_conn_callback(m_conn);
+                    is_conned = true;
                 } else {
                     m_fd_event->cancle(FdEvent::EVENT_IN);
                     LOG_ERROR << "connect error: " << strerror(errno) << ", fd: " << m_fd;
                 }
                 m_fd_event->cancle(FdEvent::EVENT_OUT);
                 m_event_loop->addEpollEvent(m_fd_event);
+
+                if (is_conned) {
+                    m_conn->setState(ConnState::Connected);
+                    if (m_conn_callback) m_conn_callback(m_conn);
+                }
             });
             m_event_loop->addEpollEvent(m_fd_event);
 

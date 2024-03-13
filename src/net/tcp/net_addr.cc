@@ -74,7 +74,7 @@ bool IPNetAddr::checkValid()
 {
     if (m_ip.empty() ||
         m_port <= 0 ||
-        m_port > 65536 ||
+        m_port > 65535 ||
         inet_addr(m_ip.c_str()) == INADDR_NONE) return false;
 
     return true;

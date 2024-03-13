@@ -126,6 +126,7 @@ void TcpConnection::onWrite()
             messages.push_back(tmp.first.get());
         }
         m_coder->encode(messages, m_out_buffer);
+        LOG_ERROR << "EOOOOOOO";
     }
 
     bool is_write_all = false;
@@ -158,8 +159,13 @@ void TcpConnection::onWrite()
     }
 
     if (m_conn_type == ConnType::ConnByClient) {
+        LOG_ERROR << "EOOOOOOO";
+
         for (auto tmp: m_write_callbask) {
-            tmp.second(tmp.first);
+            auto func = tmp.second;
+            if (func) {
+                func(tmp.first);
+            }
         }
         m_write_callbask.clear();
     }

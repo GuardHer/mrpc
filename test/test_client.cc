@@ -34,9 +34,15 @@ void test_tcp_connection()
     inet_aton("127.0.0.1", &server_addr.sin_addr);
 
     int rt = ::connect(fd, reinterpret_cast<sockaddr *>(&server_addr), sizeof(server_addr));
+    if (rt < 0) {
+        LOG_ERROR << "connect, error";
+    }
 
     std::string msg = "hello mrpc!";
     rt = ::write(fd, msg.c_str(), msg.length());
+    if (rt < 0) {
+        LOG_ERROR << "write, error";
+    }
 
     LOG_DEBUG << "success write rt:" << rt;
 
@@ -57,6 +63,7 @@ void test_tcp_client()
     IPNetAddr::s_ptr addr = std::make_shared<IPNetAddr>("127.0.0.1", 12345);
 
     TcpClient cli(addr);
+
 
     auto conn_fun = [&cli](const TcpConnectionPtr &conn) {
         LOG_INFO << conn->getState() << ", conn_fun conn success!";

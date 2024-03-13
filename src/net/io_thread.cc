@@ -3,6 +3,7 @@
 #include "src/common/util.h"
 
 #include <assert.h>
+#include <string.h>
 
 namespace mrpc
 {
@@ -20,6 +21,9 @@ IOThread::IOThread()
 
     // wait, 直到新线程执行完 Main 函数的前置
     ret = sem_wait(&m_init_semaphore);
+    if (ret < 0) {
+        LOG_ERROR << "sem_wait error info: " << strerror(errno);
+    }
 
     LOG_DEBUG << "IOThread create success, tid: " << m_tid;
 }
