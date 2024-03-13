@@ -22,8 +22,7 @@ TcpClient::TcpClient(NetAddr::s_ptr peer_addr)
     m_fd_event = FdEventGroup::GetFdEventGroup()->getFdEvent(m_fd);
     m_fd_event->setNonBlocking();
 
-    m_conn = std::make_shared<TcpConnection>(m_event_loop, m_fd, 1024, m_peer_addr);
-    m_conn->setConnType(ConnType::ConnByClient);
+    m_conn = std::make_shared<TcpConnection>(m_event_loop, m_fd, 1024, m_peer_addr, ConnType::ConnByClient);
 }
 
 TcpClient::~TcpClient()
@@ -38,8 +37,8 @@ void TcpClient::connect()
     int rt = ::connect(m_fd, m_peer_addr->getSockAddr(), m_peer_addr->getSocketLen());
     if (rt == 0) {
         LOG_DEBUG << "connect [" << m_peer_addr->toString() << "] success!";
-        if (m_conn_callback) m_conn_callback(m_conn);
         m_conn->setState(ConnState::Connected);
+        if (m_conn_callback) m_conn_callback(m_conn);
     } else if (rt == -1) {
         if (errno == EINPROGRESS) {
             // epoll 监听可写事件, 判断错误码
@@ -51,6 +50,7 @@ void TcpClient::connect()
                 if (error == 0) {
                     LOG_DEBUG << "connect [" << m_peer_addr->toString() << "] success!";
                     is_conned = true;
+                    m_conn->setState(ConnState::Connected);
                 } else {
                     m_fd_event->cancle(FdEvent::EVENT_IN);
                     LOG_ERROR << "connect error: " << strerror(errno) << ", fd: " << m_fd;
@@ -59,7 +59,6 @@ void TcpClient::connect()
                 m_event_loop->addEpollEvent(m_fd_event);
 
                 if (is_conned) {
-                    m_conn->setState(ConnState::Connected);
                     if (m_conn_callback) m_conn_callback(m_conn);
                 }
             });
@@ -82,8 +81,12 @@ void TcpClient::writeMessage(AbstractProtocol::s_ptr message)
     m_conn->listenWrite();
 }
 
-void TcpClient::readMessage(AbstractProtocol::s_ptr message)
+void TcpClient::readMessage(const std::string &req_id)
 {
+    // 监听可读事件
+    // 从buffer里 decode 得到message
+    m_conn->pushReadMessage(req_id, m_read_callback);
+	m_conn->listenRead();
 }
 
 }// namespace mrpc

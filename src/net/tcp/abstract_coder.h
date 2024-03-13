@@ -17,9 +17,9 @@ public:
 
 public:
     /// @brief 编码, 将message对象转为字节流, 写入buffer
-    virtual void encode(std::vector<AbstractProtocol *> &messages, TcpBuffer::s_ptr out_buffer) = 0;
+    virtual void encode(std::vector<AbstractProtocol::s_ptr> &messages, TcpBuffer::s_ptr out_buffer) = 0;
     /// @brief 解码, 将buffer字节流转为message对象
-    virtual void decode(std::vector<AbstractProtocol *> &out_messages, TcpBuffer::s_ptr buffer) = 0;
+    virtual void decode(std::vector<AbstractProtocol::s_ptr> &out_messages, TcpBuffer::s_ptr buffer) = 0;
 };
 
 }// namespace mrpc

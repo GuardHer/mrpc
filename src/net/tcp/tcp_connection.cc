@@ -8,8 +8,8 @@
 namespace mrpc
 {
 
-TcpConnection::TcpConnection(EventLoop *event_loop, int fd, int buffer_size, NetAddr::s_ptr peer_addr)
-    : m_fd(fd), m_event_loop(event_loop), m_peer_addr(peer_addr), m_state(ConnState::NotConnected)
+TcpConnection::TcpConnection(EventLoop *event_loop, int fd, int buffer_size, NetAddr::s_ptr peer_addr, ConnType type)
+    : m_fd(fd), m_event_loop(event_loop), m_peer_addr(peer_addr), m_state(ConnState::NotConnected), m_conn_type(type)
 {
 
     m_coder = new StringCoder();
@@ -22,7 +22,9 @@ TcpConnection::TcpConnection(EventLoop *event_loop, int fd, int buffer_size, Net
     // 设置非阻塞
     m_fd_event->setNonBlocking();
 
-    listenRead();
+    if (m_conn_type == ConnType::ConnByServer) {
+        listenRead();
+    }
 }
 
 TcpConnection::~TcpConnection()
@@ -100,13 +102,27 @@ void TcpConnection::onRead()
 
 void TcpConnection::excute()
 {
-    // 将 rpc 请求执行业务逻辑, 获取 rpc 响应, 再把 rpc 响应发送出去
-    std::string tmp;
-    int size = m_in_buffer->readAble();
-    tmp = m_in_buffer->readAsString(size);
+    if (m_conn_type == ConnType::ConnByServer) {
+        // 将 rpc 请求执行业务逻辑, 获取 rpc 响应, 再把 rpc 响应发送出去
+        std::string tmp;
+        int size = m_in_buffer->readAble();
+        tmp = m_in_buffer->readAsString(size);
 
-    m_out_buffer->wirteToBuffer(tmp);
-    listenWrite();
+        m_out_buffer->wirteToBuffer(tmp);
+        listenWrite();
+    } else {
+        // 从buffer里 decode 得到message, 执行回调
+        std::vector<AbstractProtocol::s_ptr> result;
+        m_coder->decode(result, m_in_buffer);
+
+        for (auto re: result) {
+            std::string req_id = re->getReqId();
+            auto it = m_read_callbask.find(req_id);
+            if (it != m_read_callbask.end()) {
+                if (it->second) it->second(re);
+            }
+        }
+    }
 }
 
 void TcpConnection::onWrite()
@@ -121,12 +137,11 @@ void TcpConnection::onWrite()
     if (m_conn_type == ConnType::ConnByClient) {
         // 将message encode 得到字节流
         // 将字节流写入到buffer
-        std::vector<AbstractProtocol *> messages;
+        std::vector<AbstractProtocol::s_ptr> messages;
         for (auto tmp: m_write_callbask) {
-            messages.push_back(tmp.first.get());
+            messages.push_back(tmp.first);
         }
         m_coder->encode(messages, m_out_buffer);
-        LOG_ERROR << "EOOOOOOO";
     }
 
     bool is_write_all = false;
@@ -159,7 +174,6 @@ void TcpConnection::onWrite()
     }
 
     if (m_conn_type == ConnType::ConnByClient) {
-        LOG_ERROR << "EOOOOOOO";
 
         for (auto tmp: m_write_callbask) {
             auto func = tmp.second;

@@ -9,23 +9,27 @@ namespace mrpc
 class StringProtocol : public AbstractProtocol
 {
 public:
+    typedef std::shared_ptr<StringProtocol> s_ptr;
+
+public:
     std::string info;
 };
 
 class StringCoder : public AbstractCoder
 {
 public:
-    void encode(std::vector<AbstractProtocol *> &messages, TcpBuffer::s_ptr out_buffer) override
+    void encode(std::vector<AbstractProtocol::s_ptr> &messages, TcpBuffer::s_ptr out_buffer) override
     {
         for (auto message: messages) {
-            out_buffer->wirteToBuffer(dynamic_cast<StringProtocol *>(message)->info);
+            out_buffer->wirteToBuffer(dynamic_cast<StringProtocol *>(message.get())->info);
         }
     }
-    void decode(std::vector<AbstractProtocol *> &out_messages, TcpBuffer::s_ptr buffer) override
+    void decode(std::vector<AbstractProtocol::s_ptr> &out_messages, TcpBuffer::s_ptr buffer) override
     {
-        StringProtocol *msg = new StringProtocol();
+        StringProtocol::s_ptr msg = std::make_shared<StringProtocol>();
         std::string tmp = buffer->readAllAsString();
         msg->info = tmp;
+		msg->setReqId("123456");
         out_messages.push_back(msg);
     }
 };

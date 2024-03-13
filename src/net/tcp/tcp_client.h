@@ -28,12 +28,12 @@ public:
     void writeMessage(AbstractProtocol::s_ptr message);
 
     /// @brief 发送 message 成功, done 会被执行
-    void readMessage(AbstractProtocol::s_ptr message);
+    void readMessage(const std::string &req_id);
 
     void setConnectionCallBack(const ConnectionCallback &cb) { m_conn_callback = cb; }
     void setCloseCallBack(const CloseCallback &cb) { m_close_callback = cb; }
     void setWriteCompleteCallBack(const WriteCompleteCallback &cb) { m_write_complete_callback = cb; }
-    void setMessageCallBack(const MessageCallback &cb) { m_message_callback = cb; }
+    void setReadCallBack(const ReadCallback &cb) { m_read_callback = cb; }
 
 private:
     NetAddr::s_ptr m_peer_addr;
@@ -45,7 +45,7 @@ private:
     ConnectionCallback m_conn_callback;
     CloseCallback m_close_callback;
     WriteCompleteCallback m_write_complete_callback;
-    MessageCallback m_message_callback;
+    ReadCallback m_read_callback;
 };
 
 }// namespace mrpc

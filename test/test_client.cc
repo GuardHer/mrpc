@@ -69,16 +69,27 @@ void test_tcp_client()
         LOG_INFO << conn->getState() << ", conn_fun conn success!";
 
         std::shared_ptr<StringProtocol> message = std::make_shared<StringProtocol>();
-        message->info = "Hello!";
+        message->info = "Hello mrpc!";
         message->setReqId("123456");
 
         cli.writeMessage(message);
+        cli.writeMessage(message);
+        cli.writeMessage(message);
+        cli.writeMessage(message);
+
+        cli.readMessage("123456");
     };
     auto write_fun = [&cli](const AbstractProtocolPtr &message) {
         LOG_INFO << "write_fun!";
     };
+    auto read_fun = [&cli](const AbstractProtocolPtr &message) {
+        auto msg = std::dynamic_pointer_cast<StringProtocol>(message);
+        LOG_INFO << "read_fun, req_id: " << msg->getReqId();
+        LOG_INFO << "read_fun, info: " << msg->info;
+    };
 
     cli.setWriteCompleteCallBack(write_fun);
+    cli.setReadCallBack(read_fun);
     cli.setConnectionCallBack(conn_fun);
 
     cli.connect();

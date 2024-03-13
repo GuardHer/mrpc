@@ -35,7 +35,7 @@ public:
     typedef std::pair<AbstractProtocol::s_ptr, WriteCompleteCallback> write_callback_pair;
 
 public:
-    TcpConnection(EventLoop *event_loop, int fd, int buffer_size, NetAddr::s_ptr peer_addr);
+    TcpConnection(EventLoop *event_loop, int fd, int buffer_size, NetAddr::s_ptr peer_addr, ConnType type = ConnType::ConnByServer);
     ~TcpConnection();
 
 public:
@@ -77,6 +77,7 @@ public:
     ConnType getConnType() const { return m_conn_type; }
 
     void pushWriteMessage(write_callback_pair cb_pair) { m_write_callbask.push_back(cb_pair); }
+    void pushReadMessage(const std::string &req_id, ReadCallback cb) { m_read_callbask.insert(std::make_pair(req_id, cb)); }
 
 
 private:
@@ -92,6 +93,7 @@ private:
     AbstractCoder *m_coder{nullptr};             // 编解码
     // std::pair<AbstractProtocol::s_ptr, std::function<AbstractProtocol::s_ptr>>;
     std::vector<write_callback_pair> m_write_callbask;
+    std::map<std::string, ReadCallback> m_read_callbask;
 };
 
 }// namespace mrpc
