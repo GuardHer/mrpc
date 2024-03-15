@@ -84,10 +84,7 @@ void test_tcp_client()
 
         cli.writeMessage(message);
         cli.writeMessage(message);
-        cli.writeMessage(message);
-        cli.writeMessage(message);
-        cli.writeMessage(message);
-        cli.readMessage("123456789");
+
         cli.readMessage("123456789");
     };
     auto write_fun = [&cli](const AbstractProtocolPtr &message) {

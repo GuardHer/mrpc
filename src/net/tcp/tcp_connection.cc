@@ -62,7 +62,7 @@ void TcpConnection::onRead()
 
         // 如果有数据读
         if (rt > 0) {
-            tmp.resize(rt);     // 缩小 tmp 的大小以匹配实际读取的字节数
+            tmp.resize(rt);// 缩小 tmp 的大小以匹配实际读取的字节数
             LOG_DEBUG << "success read bytes: " << rt << ", wirteAble: " << read_count << ", tmp: " << tmp;
             m_in_buffer->wirteToBuffer(tmp);
             // 如果没读完, 就继续读
@@ -104,11 +104,23 @@ void TcpConnection::excute()
 {
     if (m_conn_type == ConnType::ConnByServer) {
         // 将 rpc 请求执行业务逻辑, 获取 rpc 响应, 再把 rpc 响应发送出去
-        std::string tmp;
-        int size = m_in_buffer->readAble();
-        tmp = m_in_buffer->readAsString(size);
+        std::vector<AbstractProtocol::s_ptr> result;
+        std::vector<AbstractProtocol::s_ptr> reply_result;
 
-        m_out_buffer->wirteToBuffer(tmp);
+        m_coder->decode(result, m_in_buffer);
+        LOG_DEBUG << "result size: " << result.size();
+        for (auto re: result) {
+            // 针对每一个请求, 调用 rpc 方法, 获取响应 message
+            // 将响应 message 放入到发送缓冲区， 监听可写事件回包
+            std::shared_ptr<TinyPBProtocol> message = std::dynamic_pointer_cast<TinyPBProtocol>(re);
+
+            message->m_pb_data = "Hello, this is mrpc rpc test data!";
+            message->m_req_id = re->m_req_id;
+            reply_result.push_back(message);
+
+            LOG_DEBUG << "req id: " << message->m_req_id;
+        }
+        m_coder->encode(reply_result, m_out_buffer);
         listenWrite();
     } else {
         // 从buffer里 decode 得到message, 执行回调

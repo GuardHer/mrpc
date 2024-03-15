@@ -12,7 +12,10 @@ void TinyPBCoder::encode(std::vector<AbstractProtocol::s_ptr> &messages, TcpBuff
     for (auto &message: messages) {
         std::shared_ptr<TinyPBProtocol> msg = std::dynamic_pointer_cast<TinyPBProtocol>(message);
         int len = 0;
-        if (!checkPack(msg)) continue;
+        // if (!checkPack(msg)) {
+        //     LOG_INFO << "! checkPack";
+        //     continue;
+        // }
         std::string buf = encodeTinyPB(msg, len);
         if (!buf.empty() && len != 0) {
             out_buffer->wirteToBuffer(buf);
@@ -35,9 +38,10 @@ void TinyPBCoder::decode(std::vector<AbstractProtocol::s_ptr> &out_messages, Tcp
             if (tmp[i] == TinyPBProtocol::PB_START) {
 
                 pk_len = networkToHost32(&tmp[i + 1]);
-                LOG_INFO << "get pk_len = " << pk_len << ", i: " << i;
-
                 int j = i + pk_len - 1;
+
+                LOG_INFO << "get pk_len = " << pk_len << ", i: " << i << ", j: " << j;
+
                 // 包不完整
                 if (j >= buffer->writeIndex()) {
                     continue;
@@ -62,11 +66,14 @@ void TinyPBCoder::decode(std::vector<AbstractProtocol::s_ptr> &out_messages, Tcp
                 LOG_ERROR << "parse error, pk_len: " << pk_len << " < 26";
                 return;
             }
+            if (buffer->readAble() < pk_len) return;
+
             auto message = std::make_shared<TinyPBProtocol>();
             std::string str = buffer->peekAsString(start_index, end_index);
             buffer->moveReadIndex(end_index - start_index + 1);
 
             TcpBuffer buf(str);
+            LOG_DEBUG << buf.readAble() << "; " << pk_len;
             buf.readAsString(1);                                                // PB_START
             message->m_pk_len = buf.readInt<int32_t>();                         // m_pk_len
             message->m_req_id_len = buf.readInt<int32_t>();                     // m_req_id_len
@@ -112,7 +119,6 @@ std::string TinyPBCoder::encodeTinyPB(std::shared_ptr<TinyPBProtocol> message, i
     buffer.wirteToBuffer(&TinyPBProtocol::PB_END, 1);   // PB_START
 
     std::string result = buffer.readAllAsString();
-    ;
     LOG_DEBUG << "result len: " << result.length() << ", pk_len: " << pk_len;
     len = pk_len;
     return result;

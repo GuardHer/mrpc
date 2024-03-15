@@ -1,6 +1,7 @@
 #include "src/net/tcp/tcp_buffer.h"
 #include "src/common/log.h"
 
+#include <assert.h>
 #include <cstring>
 #include <string.h>
 
@@ -92,6 +93,7 @@ void TcpBuffer::readFromBuffer(std::vector<char> &re, int size)
     int read_size = readAble() > size ? size : readAble();
 
     std::vector<char> tmp(read_size);
+    re.resize(read_size);
     // memcpy(&tmp[0], &m_buffer[m_read_index], read_size);
     std::copy(beginRead(), beginRead() + read_size, tmp.begin());
 
@@ -101,9 +103,9 @@ void TcpBuffer::readFromBuffer(std::vector<char> &re, int size)
 
 std::string TcpBuffer::readAsString(int size)
 {
+    if (size <= 0) return std::string();
     std::vector<char> tmp;
     readFromBuffer(tmp, size);
-
     std::string res(tmp.begin(), tmp.end());
 
     return res;
