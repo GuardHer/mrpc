@@ -51,9 +51,12 @@ set(SOURCE_FILE_NET
 	${PROJECT_SOURCE_DIR}/src/net/tcp/tcp_acceptor.cc
 	${PROJECT_SOURCE_DIR}/src/net/tcp/tcp_server.cc
 	${PROJECT_SOURCE_DIR}/src/net/tcp/tcp_client.cc
-	${PROJECT_SOURCE_DIR}/src/net/tcp/abstract_protocol.cc
 	${PROJECT_SOURCE_DIR}/src/net/tcp/tcp_connection.cc
 	${PROJECT_SOURCE_DIR}/src/net/tcp/net_addr.cc
+
+	${PROJECT_SOURCE_DIR}/src/net/coder/abstract_protocol.cc
+	${PROJECT_SOURCE_DIR}/src/net/coder/tinypb_coder.cc
+	${PROJECT_SOURCE_DIR}/src/net/coder/tinypb_protocol.cc
 
 )
 
@@ -84,6 +87,14 @@ add_executable(eventloop_test
 	${PROJECT_SOURCE_DIR}/test/test_eventloop.cc
 )
 target_link_libraries(eventloop_test ${LIBS})
+
+# test_buffer
+add_executable(buffer_test
+	${SOURCE_FILE_COMMON} 
+	${SOURCE_FILE_NET}
+	${PROJECT_SOURCE_DIR}/test/test_buffer.cc
+)
+target_link_libraries(buffer_test ${LIBS})
 
 # test_timer
 add_executable(timer_test

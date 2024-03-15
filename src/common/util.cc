@@ -1,5 +1,6 @@
 #include "src/common/util.h"
 
+#include <cstring>
 #include <sys/syscall.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -37,5 +38,14 @@ int64_t getNowMs()
 
     return val.tv_sec * 1000 + val.tv_usec / 1000;
 }
+
+uint32_t networkToHost32(const char *net32)
+{
+    uint32_t result;
+
+    std::memcpy(&result, net32, sizeof(uint32_t));
+    return be32toh(result);
+}
+
 
 }// namespace mrpc

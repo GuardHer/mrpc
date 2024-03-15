@@ -22,7 +22,7 @@ TcpClient::TcpClient(NetAddr::s_ptr peer_addr)
     m_fd_event = FdEventGroup::GetFdEventGroup()->getFdEvent(m_fd);
     m_fd_event->setNonBlocking();
 
-    m_conn = std::make_shared<TcpConnection>(m_event_loop, m_fd, 1024, m_peer_addr, ConnType::ConnByClient);
+    m_conn = std::make_shared<TcpConnection>(m_event_loop, m_fd, 24, m_peer_addr, ConnType::ConnByClient);
 }
 
 TcpClient::~TcpClient()
@@ -86,7 +86,7 @@ void TcpClient::readMessage(const std::string &req_id)
     // 监听可读事件
     // 从buffer里 decode 得到message
     m_conn->pushReadMessage(req_id, m_read_callback);
-	m_conn->listenRead();
+    m_conn->listenRead();
 }
 
 }// namespace mrpc

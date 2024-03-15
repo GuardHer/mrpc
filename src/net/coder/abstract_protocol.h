@@ -9,17 +9,13 @@
 namespace mrpc
 {
 
-class AbstractProtocol
+struct AbstractProtocol
 {
 public:
     typedef std::shared_ptr<AbstractProtocol> s_ptr;
     virtual ~AbstractProtocol(){};
 
 public:
-    std::string getReqId() const { return m_req_id; }
-    void setReqId(const std::string &value) { m_req_id = value; }
-
-protected:
     std::string m_req_id;
 
 private:

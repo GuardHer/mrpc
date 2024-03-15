@@ -1,7 +1,7 @@
 #include "src/net/tcp/tcp_connection.h"
 #include "src/common/log.h"
+#include "src/net/coder/tinypb_coder.h"
 #include "src/net/fd_event_group.h"
-#include "src/net/tcp/string_coder.h"
 #include <string.h>
 #include <unistd.h>
 
@@ -12,7 +12,7 @@ TcpConnection::TcpConnection(EventLoop *event_loop, int fd, int buffer_size, Net
     : m_fd(fd), m_event_loop(event_loop), m_peer_addr(peer_addr), m_state(ConnState::NotConnected), m_conn_type(type)
 {
 
-    m_coder = new StringCoder();
+    m_coder = new TinyPBCoder();
 
     m_in_buffer = std::make_shared<TcpBuffer>(buffer_size);
     m_out_buffer = std::make_shared<TcpBuffer>(buffer_size);
@@ -38,6 +38,7 @@ TcpConnection::~TcpConnection()
 
 void TcpConnection::onRead()
 {
+    LOG_INFO << "onRead!";
     /// 从 socket 缓冲区, 调用系统的 read 到 in_buffer
     if (m_state != ConnState::Connected) {
         LOG_ERROR << "onRead error, client has alread disconnected, cliend_fd: " << m_fd << ", addr: " << m_peer_addr->toString();
@@ -48,10 +49,10 @@ void TcpConnection::onRead()
     bool is_read_all = false;
     bool is_close = false;
     while (!is_read_all) {
-        if (m_in_buffer->wirteAble() == 0) {
+        if (m_in_buffer->writAble() == 0) {
             m_in_buffer->resizeBuffer(2 * m_in_buffer->getBufferSize());
         }
-        int read_count = m_in_buffer->wirteAble();
+        int read_count = m_in_buffer->writAble();
         // char tmp[read_count + 10];
         // memset(tmp, 0, sizeof(tmp));
         std::string tmp;
@@ -62,7 +63,6 @@ void TcpConnection::onRead()
         // 如果有数据读
         if (rt > 0) {
             tmp.resize(rt);     // 缩小 tmp 的大小以匹配实际读取的字节数
-            tmp.push_back('\0');// 添加 null 终止字符
             LOG_DEBUG << "success read bytes: " << rt << ", wirteAble: " << read_count << ", tmp: " << tmp;
             m_in_buffer->wirteToBuffer(tmp);
             // 如果没读完, 就继续读
@@ -116,7 +116,7 @@ void TcpConnection::excute()
         m_coder->decode(result, m_in_buffer);
 
         for (auto re: result) {
-            std::string req_id = re->getReqId();
+            std::string req_id = re->m_req_id;
             auto it = m_read_callbask.find(req_id);
             if (it != m_read_callbask.end()) {
                 if (it->second) it->second(re);
@@ -174,7 +174,6 @@ void TcpConnection::onWrite()
     }
 
     if (m_conn_type == ConnType::ConnByClient) {
-
         for (auto tmp: m_write_callbask) {
             auto func = tmp.second;
             if (func) {

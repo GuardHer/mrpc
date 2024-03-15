@@ -1,8 +1,9 @@
 #include "src/common/config.h"
 #include "src/common/log.h"
-#include "src/net/tcp/abstract_protocol.h"
+#include "src/net/coder/abstract_protocol.h"
+#include "src/net/coder/tinypb_coder.h"
+#include "src/net/coder/tinypb_protocol.h"
 #include "src/net/tcp/net_addr.h"
-#include "src/net/tcp/string_coder.h"
 #include "src/net/tcp/tcp_client.h"
 #include "src/net/tcp/tcp_connection.h"
 #include "src/net/tcp/tcp_server.h"
@@ -68,24 +69,34 @@ void test_tcp_client()
     auto conn_fun = [&cli](const TcpConnectionPtr &conn) {
         LOG_INFO << conn->getState() << ", conn_fun conn success!";
 
-        std::shared_ptr<StringProtocol> message = std::make_shared<StringProtocol>();
-        message->info = "Hello mrpc!";
-        message->setReqId("123456");
+        std::shared_ptr<TinyPBProtocol> message = std::make_shared<TinyPBProtocol>();
+        message->m_req_id = "123456789";
+        message->m_req_id_len = static_cast<int32_t>(message->m_req_id.length());
+        message->m_method_name = "mrpc";
+        message->m_method_len = static_cast<int32_t>(message->m_method_name.length());
+        message->m_error_code = int32_t(123);
+        message->m_error_info = "error in this func";
+        message->m_error_info_len = static_cast<int32_t>(message->m_error_info.length());
+        message->m_pb_data = "this is pb_data";
+        message->m_check_sum = int32_t(456);
+        message->m_pk_len = 26 + message->m_req_id_len + message->m_method_len + message->m_error_info_len + message->m_pb_data.length();
+        LOG_DEBUG << "m_pk_len: " << message->m_pk_len;
 
         cli.writeMessage(message);
         cli.writeMessage(message);
         cli.writeMessage(message);
         cli.writeMessage(message);
-
-        cli.readMessage("123456");
+        cli.writeMessage(message);
+        cli.readMessage("123456789");
+        cli.readMessage("123456789");
     };
     auto write_fun = [&cli](const AbstractProtocolPtr &message) {
         LOG_INFO << "write_fun!";
     };
     auto read_fun = [&cli](const AbstractProtocolPtr &message) {
-        auto msg = std::dynamic_pointer_cast<StringProtocol>(message);
-        LOG_INFO << "read_fun, req_id: " << msg->getReqId();
-        LOG_INFO << "read_fun, info: " << msg->info;
+        auto msg = std::dynamic_pointer_cast<TinyPBProtocol>(message);
+        LOG_INFO << "read_fun, req_id: " << msg->m_req_id;
+        LOG_INFO << "read_fun, info: " << msg->m_pb_data;
     };
 
     cli.setWriteCompleteCallBack(write_fun);
