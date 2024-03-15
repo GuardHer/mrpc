@@ -23,6 +23,7 @@ TcpConnection::TcpConnection(EventLoop *event_loop, int fd, int buffer_size, Net
     m_fd_event->setNonBlocking();
 
     if (m_conn_type == ConnType::ConnByServer) {
+        m_dispatcher = std::make_shared<RpcDispatcher>();
         listenRead();
     }
 }
@@ -113,12 +114,8 @@ void TcpConnection::excute()
             // 针对每一个请求, 调用 rpc 方法, 获取响应 message
             // 将响应 message 放入到发送缓冲区， 监听可写事件回包
             std::shared_ptr<TinyPBProtocol> message = std::dynamic_pointer_cast<TinyPBProtocol>(re);
-
-            message->m_pb_data = "Hello, this is mrpc rpc test data!";
-            message->m_req_id = re->m_req_id;
+            m_dispatcher->dispatch(re, message);
             reply_result.push_back(message);
-
-            LOG_DEBUG << "req id: " << message->m_req_id;
         }
         m_coder->encode(reply_result, m_out_buffer);
         listenWrite();

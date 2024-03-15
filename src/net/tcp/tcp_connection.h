@@ -5,6 +5,7 @@
 #include "src/net/coder/abstract_coder.h"
 #include "src/net/eventloop.h"
 #include "src/net/io_thread.h"
+#include "src/net/rpc/rpc_dispatcher.h"
 #include "src/net/tcp/net_addr.h"
 #include "src/net/tcp/tcp_buffer.h"
 #include <memory>
@@ -94,6 +95,8 @@ private:
     // std::pair<AbstractProtocol::s_ptr, std::function<AbstractProtocol::s_ptr>>;
     std::vector<write_callback_pair> m_write_callbask;
     std::map<std::string, ReadCallback> m_read_callbask;
+
+    std::shared_ptr<RpcDispatcher> m_dispatcher;
 };
 
 }// namespace mrpc

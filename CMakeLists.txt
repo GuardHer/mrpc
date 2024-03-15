@@ -58,6 +58,8 @@ set(SOURCE_FILE_NET
 	${PROJECT_SOURCE_DIR}/src/net/coder/tinypb_coder.cc
 	${PROJECT_SOURCE_DIR}/src/net/coder/tinypb_protocol.cc
 
+	${PROJECT_SOURCE_DIR}/src/net/rpc/rpc_dispatcher.cc
+
 )
 
 # 生成库文件
