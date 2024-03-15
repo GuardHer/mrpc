@@ -10,6 +10,8 @@
 namespace mrpc
 {
 
+class TcpConnection;
+
 class RpcDispatcher
 {
 public:
@@ -19,11 +21,17 @@ public:
     /// @brief
     /// @param request  请求
     /// @param response 响应
-    void dispatch(const AbstractProtocol::s_ptr &request, AbstractProtocol::s_ptr response);
+    void dispatch(const AbstractProtocol::s_ptr &request, AbstractProtocol::s_ptr response, const TcpConnection *conn);
 
     /// @brief 注册一个service
     /// @param service
     void registerService(const service_s_ptr &service);
+
+    /// @brief 设置错误信息
+    /// @param message
+    /// @param error_code 错误码
+    /// @param error_info 错误信息
+    void setTinyPBError(std::shared_ptr<TinyPBProtocol> message, int32_t error_code, const std::string &error_info);
 
 private:
     /// @brief 从 full_name, 解析出 service 名和 method 名

@@ -8,8 +8,8 @@
 namespace mrpc
 {
 
-TcpConnection::TcpConnection(EventLoop *event_loop, int fd, int buffer_size, NetAddr::s_ptr peer_addr, ConnType type)
-    : m_fd(fd), m_event_loop(event_loop), m_peer_addr(peer_addr), m_state(ConnState::NotConnected), m_conn_type(type)
+TcpConnection::TcpConnection(EventLoop *event_loop, int fd, int buffer_size, NetAddr::s_ptr peer_addr, NetAddr::s_ptr local_addr, ConnType type)
+    : m_fd(fd), m_event_loop(event_loop), m_local_addr(local_addr), m_peer_addr(peer_addr), m_state(ConnState::NotConnected), m_conn_type(type)
 {
 
     m_coder = new TinyPBCoder();
@@ -114,7 +114,7 @@ void TcpConnection::excute()
             // 针对每一个请求, 调用 rpc 方法, 获取响应 message
             // 将响应 message 放入到发送缓冲区， 监听可写事件回包
             std::shared_ptr<TinyPBProtocol> message = std::dynamic_pointer_cast<TinyPBProtocol>(re);
-            m_dispatcher->dispatch(re, message);
+            m_dispatcher->dispatch(re, message, this);
             reply_result.push_back(message);
         }
         m_coder->encode(reply_result, m_out_buffer);

@@ -36,7 +36,7 @@ public:
     typedef std::pair<AbstractProtocol::s_ptr, WriteCompleteCallback> write_callback_pair;
 
 public:
-    TcpConnection(EventLoop *event_loop, int fd, int buffer_size, NetAddr::s_ptr peer_addr, ConnType type = ConnType::ConnByServer);
+    TcpConnection(EventLoop *event_loop, int fd, int buffer_size, NetAddr::s_ptr peer_addr, NetAddr::s_ptr local_addr, ConnType type = ConnType::ConnByServer);
     ~TcpConnection();
 
 public:
@@ -80,11 +80,14 @@ public:
     void pushWriteMessage(write_callback_pair cb_pair) { m_write_callbask.push_back(cb_pair); }
     void pushReadMessage(const std::string &req_id, ReadCallback cb) { m_read_callbask.insert(std::make_pair(req_id, cb)); }
 
+    NetAddr::s_ptr getLocalAddr() const { return m_local_addr; }
+    NetAddr::s_ptr getPeerAddr() const { return m_peer_addr; }
+    void setLocalAddr(NetAddr::s_ptr addr) { m_local_addr = addr; }
 
 private:
     int m_fd{-1};                                // socket
     EventLoop *m_event_loop{nullptr};            //
-    NetAddr::s_ptr m_addr;                       //
+    NetAddr::s_ptr m_local_addr;                 //
     NetAddr::s_ptr m_peer_addr;                  //
     TcpBuffer::s_ptr m_in_buffer;                // 接收缓冲区
     TcpBuffer::s_ptr m_out_buffer;               // 发送缓冲区

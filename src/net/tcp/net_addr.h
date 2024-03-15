@@ -23,6 +23,8 @@ public:
     virtual std::string toString() = 0;
 
     virtual bool checkValid() = 0;
+
+    virtual sockaddr_in getSockAddrIn() = 0;
 };
 
 class IPNetAddr : public NetAddr
@@ -43,6 +45,8 @@ public:
     std::string toString() override;
 
     bool checkValid() override;
+
+    sockaddr_in getSockAddrIn() override { return m_addr; }
 
 private:
     std::string m_ip{};

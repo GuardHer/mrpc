@@ -15,7 +15,7 @@ namespace mrpc
 class TcpClient
 {
 public:
-    //AbstractProtocol::s_ptr
+    typedef std::pair<std::string, uint16_t> addr_pair;
 
 public:
     TcpClient(NetAddr::s_ptr peer_addr);
@@ -34,6 +34,8 @@ public:
     void setCloseCallBack(const CloseCallback &cb) { m_close_callback = cb; }
     void setWriteCompleteCallBack(const WriteCompleteCallback &cb) { m_write_complete_callback = cb; }
     void setReadCallBack(const ReadCallback &cb) { m_read_callback = cb; }
+
+    addr_pair getSocketLocalAddr();
 
 private:
     NetAddr::s_ptr m_peer_addr;

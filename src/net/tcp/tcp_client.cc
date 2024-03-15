@@ -22,7 +22,7 @@ TcpClient::TcpClient(NetAddr::s_ptr peer_addr)
     m_fd_event = FdEventGroup::GetFdEventGroup()->getFdEvent(m_fd);
     m_fd_event->setNonBlocking();
 
-    m_conn = std::make_shared<TcpConnection>(m_event_loop, m_fd, 24, m_peer_addr, ConnType::ConnByClient);
+    m_conn = std::make_shared<TcpConnection>(m_event_loop, m_fd, 128, m_peer_addr, nullptr, ConnType::ConnByClient);
 }
 
 TcpClient::~TcpClient()
@@ -51,6 +51,9 @@ void TcpClient::connect()
                     LOG_DEBUG << "connect [" << m_peer_addr->toString() << "] success!";
                     is_conned = true;
                     m_conn->setState(ConnState::Connected);
+                    auto addr_pair = getSocketLocalAddr();
+                    auto addr = std::make_shared<IPNetAddr>(addr_pair.first, addr_pair.second);
+                    m_conn->setLocalAddr(addr);
                 } else {
                     m_fd_event->cancle(FdEvent::EVENT_IN);
                     LOG_ERROR << "connect error: " << strerror(errno) << ", fd: " << m_fd;
@@ -87,6 +90,27 @@ void TcpClient::readMessage(const std::string &req_id)
     // 从buffer里 decode 得到message
     m_conn->pushReadMessage(req_id, m_read_callback);
     m_conn->listenRead();
+}
+
+TcpClient::addr_pair TcpClient::getSocketLocalAddr()
+{
+    addr_pair result;
+    auto local_addr_in = m_peer_addr->getSockAddrIn();
+    socklen_t local_addr_len = m_peer_addr->getSocketLen();
+    if (::getsockname(m_fd, m_peer_addr->getSockAddr(), &local_addr_len) == -1) {
+        LOG_ERROR << "Error in getsockname(): " << strerror(errno);
+        return result;
+    }
+
+    // 打印本地地址和端口号
+    char local_ip[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &local_addr_in.sin_addr, local_ip, INET_ADDRSTRLEN);
+    uint16_t local_port = ntohs(local_addr_in.sin_port);
+
+    result.first = std::string(local_ip);
+    result.second = local_port;
+
+    return result;
 }
 
 }// namespace mrpc
