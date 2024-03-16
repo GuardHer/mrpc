@@ -54,12 +54,12 @@ public:
     /// @return m_error_info
     std::string GetErrorInfo() const;
 
-    /// @brief 设置req_id
-    /// @param req_id
-    void SetReqId(const std::string &req_id);
+    /// @brief 设置msg_id
+    /// @param msg_id
+    void SetReqId(const std::string &msg_id);
 
-    /// @brief 获取 req_id
-    /// @return m_req_id
+    /// @brief 获取 msg_id
+    /// @return m_msg_id
     std::string GetReqId() const;
 
     /// @brief 设置本地地址
@@ -91,7 +91,7 @@ private:
     int32_t m_error_code{0};    // 错误码
     int32_t m_timeout{1000};    // 超时 ms
     std::string m_error_info;   // 错误信息
-    std::string m_req_id;       // 请求码
+    std::string m_msg_id;       // 请求码
     bool m_is_failed{false};    // 是否失败
     bool m_is_cancle{false};    // 是否取消
     NetAddr::s_ptr m_loacl_addr;// 本地地址

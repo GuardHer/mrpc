@@ -16,7 +16,7 @@ public:
     virtual ~AbstractProtocol(){};
 
 public:
-    std::string m_req_id;
+    std::string m_msg_id;
 
 private:
 };

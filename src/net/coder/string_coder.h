@@ -29,7 +29,7 @@ public:
         StringProtocol::s_ptr msg = std::make_shared<StringProtocol>();
         std::string tmp = buffer->readAllAsString();
         msg->info = tmp;
-        msg->m_req_id = "123465";
+        msg->m_msg_id = "123465";
         out_messages.push_back(msg);
     }
 };

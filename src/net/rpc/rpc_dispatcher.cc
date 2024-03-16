@@ -35,14 +35,14 @@ void RpcDispatcher::dispatch(const AbstractProtocol::s_ptr &request, AbstractPro
     std::string method_name;
 
     // 初始化 rsp_protocol
-    rsp_protocol->m_req_id = req_protocol->m_req_id;
-    rsp_protocol->m_req_id_len = req_protocol->m_req_id_len;
+    rsp_protocol->m_msg_id = req_protocol->m_msg_id;
+    rsp_protocol->m_msg_id_len = req_protocol->m_msg_id_len;
     rsp_protocol->m_method_name = req_protocol->m_method_name;
     rsp_protocol->m_method_len = req_protocol->m_method_len;
 
     if (!parseServiceFullName(full_name, service_name, method_name)) {
         // 解析错误
-        LOG_ERROR << "[" << req_protocol->m_req_id << "] parse service_name or method_name failed: " << full_name;
+        LOG_ERROR << "[" << req_protocol->m_msg_id << "] parse service_name or method_name failed: " << full_name;
         setTinyPBError(rsp_protocol, ERROR_PARSE_SERVICE_NAME, "parse service_name or method_name failed");
 
         return;
@@ -51,7 +51,7 @@ void RpcDispatcher::dispatch(const AbstractProtocol::s_ptr &request, AbstractPro
     auto it = m_services.find(service_name);
     if (it == m_services.end()) {
         // service 不存在
-        LOG_ERROR << "[" << req_protocol->m_req_id << "] service not found: " << service_name;
+        LOG_ERROR << "[" << req_protocol->m_msg_id << "] service not found: " << service_name;
         setTinyPBError(rsp_protocol, ERROR_SERVICE_NOT_FOUND, "service not found");
         return;
     }
@@ -60,7 +60,7 @@ void RpcDispatcher::dispatch(const AbstractProtocol::s_ptr &request, AbstractPro
     auto method = service->GetDescriptor()->FindMethodByName(method_name);
     if (method == nullptr) {
         // method 不存在
-        LOG_ERROR << "[" << req_protocol->m_req_id << "] method not found: " << method_name << ", in service: " << service_name;
+        LOG_ERROR << "[" << req_protocol->m_msg_id << "] method not found: " << method_name << ", in service: " << service_name;
         setTinyPBError(rsp_protocol, ERROR_METHOD_NOT_FOUND, "method not found");
         return;
     }
@@ -70,7 +70,7 @@ void RpcDispatcher::dispatch(const AbstractProtocol::s_ptr &request, AbstractPro
     // 反序列化, 将 Pb_data 反序列化为 req_message
     if (!req_message->ParseFromString(req_protocol->m_pb_data)) {
         // 反序列化失败
-        LOG_ERROR << "[" << req_protocol->m_req_id << "] deserilize failed: " << service_name;
+        LOG_ERROR << "[" << req_protocol->m_msg_id << "] deserilize failed: " << service_name;
         setTinyPBError(rsp_protocol, ERROR_FAILED_DESERIALIZE, "deserilize failed");
         if (req_message) {
             delete req_message;
@@ -84,7 +84,7 @@ void RpcDispatcher::dispatch(const AbstractProtocol::s_ptr &request, AbstractPro
 
     rpcController.SetLocalAddr(conn->getLocalAddr());
     rpcController.SetPeerAddr(conn->getPeerAddr());
-    rpcController.SetReqId(req_protocol->m_req_id);
+    rpcController.SetReqId(req_protocol->m_msg_id);
 
     std::function<void()> reply_package_func = []() {
         LOG_INFO << "reply_package_func";
@@ -97,7 +97,7 @@ void RpcDispatcher::dispatch(const AbstractProtocol::s_ptr &request, AbstractPro
     // 序列化到 rsp_protocol->m_pb_data
     if (!rsp_message->SerializeToString(&(rsp_protocol->m_pb_data))) {
         // 序列化失败
-        LOG_ERROR << "[" << req_protocol->m_req_id << "] serilize failed: " << service_name;
+        LOG_ERROR << "[" << req_protocol->m_msg_id << "] serilize failed: " << service_name;
         setTinyPBError(rsp_protocol, ERROR_FAILED_SERIALIZE, "serilize failed");
         if (req_message) {
             delete req_message;
@@ -111,7 +111,7 @@ void RpcDispatcher::dispatch(const AbstractProtocol::s_ptr &request, AbstractPro
     }
 
     rsp_protocol->m_error_code = 0;
-    LOG_INFO << "req id: " << req_protocol->m_req_id << ", get rpc request: " << req_message->ShortDebugString();
+    LOG_INFO << "msg_id: " << req_protocol->m_msg_id << ", get rpc request: " << req_message->ShortDebugString();
 
     delete req_message;
     delete rsp_message;

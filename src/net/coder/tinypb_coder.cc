@@ -76,14 +76,14 @@ void TinyPBCoder::decode(std::vector<AbstractProtocol::s_ptr> &out_messages, Tcp
             buf.readAsString(1);                                                // PB_START
             message->m_pk_len = pk_len;                                         // m_pk_len
             buf.readInt<int32_t>();                                             //
-            message->m_req_id_len = buf.readInt<int32_t>();                     // m_req_id_len
-            message->m_req_id = buf.readAsString(message->m_req_id_len);        // m_req_id
+            message->m_msg_id_len = buf.readInt<int32_t>();                     // m_msg_id_len
+            message->m_msg_id = buf.readAsString(message->m_msg_id_len);        // m_msg_id
             message->m_method_len = buf.readInt<int32_t>();                     // m_method_len
             message->m_method_name = buf.readAsString(message->m_method_len);   // m_method_name
             message->m_error_code = buf.readInt<int32_t>();                     // m_error_code
             message->m_error_info_len = buf.readInt<int32_t>();                 // m_error_info_len
             message->m_error_info = buf.readAsString(message->m_error_info_len);// m_error_info
-            int32_t pb_data_len = message->m_pk_len - message->m_req_id_len - message->m_method_len - message->m_error_info_len - 26;
+            int32_t pb_data_len = message->m_pk_len - message->m_msg_id_len - message->m_method_len - message->m_error_info_len - 26;
             message->m_pb_data = buf.readAsString(pb_data_len);// m_pb_data
             message->m_check_sum = buf.readInt<int32_t>();     // m_check_sum
             buf.readAsString(1);                               // PB_END
@@ -97,17 +97,17 @@ void TinyPBCoder::decode(std::vector<AbstractProtocol::s_ptr> &out_messages, Tcp
 
 std::string TinyPBCoder::encodeTinyPB(std::shared_ptr<TinyPBProtocol> message, int &len)
 {
-    if (message->m_req_id.empty()) {
-        message->m_req_id = "123456789";
-        message->m_req_id_len = static_cast<int32_t>(message->m_req_id.length());
+    if (message->m_msg_id.empty()) {
+        message->m_msg_id = "123456789";
+        message->m_msg_id_len = static_cast<int32_t>(message->m_msg_id.length());
     }
-    int32_t pk_len = 26 + message->m_error_info_len + message->m_method_len + message->m_req_id_len + message->m_pb_data.length();
+    int32_t pk_len = 26 + message->m_error_info_len + message->m_method_len + message->m_msg_id_len + message->m_pb_data.length();
 
     TcpBuffer buffer(pk_len);
     buffer.wirteToBuffer(&TinyPBProtocol::PB_START, 1); // PB_START
     buffer.writeInt<int32_t>(pk_len);                   // pk_len
-    buffer.writeInt<int32_t>(message->m_req_id_len);    // m_req_id_len
-    buffer.wirteToBuffer(message->m_req_id);            // m_req_id
+    buffer.writeInt<int32_t>(message->m_msg_id_len);    // m_msg_id_len
+    buffer.wirteToBuffer(message->m_msg_id);            // m_msg_id
     buffer.writeInt<int32_t>(message->m_method_len);    // m_method_len
     buffer.wirteToBuffer(message->m_method_name);       // m_method_name
     buffer.writeInt<int32_t>(message->m_error_code);    // m_error_code
@@ -125,13 +125,13 @@ std::string TinyPBCoder::encodeTinyPB(std::shared_ptr<TinyPBProtocol> message, i
 
 bool TinyPBCoder::checkPack(const std::shared_ptr<TinyPBProtocol> &message)
 {
-    int32_t req_id_len = message->m_req_id_len;
+    int32_t msg_id_len = message->m_msg_id_len;
     int32_t method_len = message->m_method_len;
     int32_t error_info_len = message->m_error_info_len;
-    int32_t pk_len = 26 + req_id_len + method_len + error_info_len + message->m_pb_data.length();
+    int32_t pk_len = 26 + msg_id_len + method_len + error_info_len + message->m_pb_data.length();
 
 
-    if (req_id_len != static_cast<int32_t>(message->m_req_id.length())) return false;
+    if (msg_id_len != static_cast<int32_t>(message->m_msg_id.length())) return false;
     if (method_len != static_cast<int32_t>(message->m_method_name.length())) return false;
     if (error_info_len != static_cast<int32_t>(message->m_error_info.length())) return false;
     if (pk_len != message->m_pk_len) return false;

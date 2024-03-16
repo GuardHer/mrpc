@@ -85,11 +85,11 @@ void TcpClient::writeMessage(AbstractProtocol::s_ptr message)
     m_conn->listenWrite();
 }
 
-void TcpClient::readMessage(const std::string &req_id)
+void TcpClient::readMessage(const std::string &msg_id)
 {
     // 监听可读事件
     // 从buffer里 decode 得到message
-    m_conn->pushReadMessage(req_id, m_read_callback);
+    m_conn->pushReadMessage(msg_id, m_read_callback);
     m_conn->listenRead();
 }
 

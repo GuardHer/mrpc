@@ -125,8 +125,8 @@ void TcpConnection::excute()
         m_coder->decode(result, m_in_buffer);
 
         for (auto re: result) {
-            std::string req_id = re->m_req_id;
-            auto it = m_read_callbask.find(req_id);
+            std::string msg_id = re->m_msg_id;
+            auto it = m_read_callbask.find(msg_id);
             if (it != m_read_callbask.end()) {
                 if (it->second) it->second(re);
             }

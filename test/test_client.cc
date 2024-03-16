@@ -70,8 +70,8 @@ void test_tcp_client()
         LOG_INFO << conn->getState() << ", conn_fun conn success!";
 
         std::shared_ptr<TinyPBProtocol> message = std::make_shared<TinyPBProtocol>();
-        message->m_req_id = "123456789";
-        message->m_req_id_len = static_cast<int32_t>(message->m_req_id.length());
+        message->m_msg_id = "123456789";
+        message->m_msg_id_len = static_cast<int32_t>(message->m_msg_id.length());
         message->m_method_name = "mrpc";
         message->m_method_len = static_cast<int32_t>(message->m_method_name.length());
         message->m_error_code = int32_t(123);
@@ -79,7 +79,7 @@ void test_tcp_client()
         message->m_error_info_len = static_cast<int32_t>(message->m_error_info.length());
         message->m_pb_data = "this is pb_data";
         message->m_check_sum = int32_t(456);
-        message->m_pk_len = 26 + message->m_req_id_len + message->m_method_len + message->m_error_info_len + message->m_pb_data.length();
+        message->m_pk_len = 26 + message->m_msg_id_len + message->m_method_len + message->m_error_info_len + message->m_pb_data.length();
         LOG_DEBUG << "m_pk_len: " << message->m_pk_len;
 
         cli.writeMessage(message);
@@ -92,7 +92,7 @@ void test_tcp_client()
     };
     auto read_fun = [&cli](const AbstractProtocolPtr &message) {
         auto msg = std::dynamic_pointer_cast<TinyPBProtocol>(message);
-        LOG_INFO << "read_fun, req_id: " << msg->m_req_id;
+        LOG_INFO << "read_fun, msg_id: " << msg->m_msg_id;
         LOG_INFO << "read_fun, info: " << msg->m_pb_data;
     };
 
