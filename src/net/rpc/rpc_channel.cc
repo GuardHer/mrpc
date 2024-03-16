@@ -10,15 +10,14 @@
 namespace mrpc
 {
 
-RpcChannel::RpcChannel(NetAddr::s_ptr peer_addr)
+RpcChannel::RpcChannel(NetAddr::s_ptr peer_addr) : m_peer_addr(peer_addr)
 {
+    m_client = std::make_shared<TcpClient>(peer_addr);
 }
+
 RpcChannel::~RpcChannel()
 {
-    if (m_done) {
-        delete m_done;
-        m_done = nullptr;
-    }
+    LOG_INFO << "~RpcChannel";
 }
 
 void RpcChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
@@ -58,17 +57,26 @@ void RpcChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
     int32_t pb_data_len = static_cast<int32_t>(req_protocol->m_pb_data.length());
     req_protocol->m_pk_len = 26 + pb_data_len + req_protocol->m_method_len + req_protocol->m_msg_id_len + req_protocol->m_error_info_len;
 
-    // 完成回调
-    if (done) {
-        m_done = dynamic_cast<RpcClosure<void> *>(done);
-    }
 
     // 创建 client
-    m_client.reset(new TcpClient(m_peer_addr));
     m_client->setConnectionCallBack(std::bind(&RpcChannel::onConnection, this, std::placeholders::_1, req_protocol));
     m_client->setWriteCompleteCallBack(std::bind(&RpcChannel::onWriteComplete, this, std::placeholders::_1));
     m_client->setReadCallBack(std::bind(&RpcChannel::onRead, this, std::placeholders::_1));
     m_client->connect();
+}
+
+void RpcChannel::Init(controller_s_ptr controller, message_s_ptr req, message_s_ptr res, closure_s_ptr done)
+{
+    if (m_is_init) {
+        return;
+    }
+
+    m_controller = controller;
+    m_request = req;
+    m_response = res;
+    m_closure = done;
+
+    m_is_init = true;
 }
 
 void RpcChannel::onConnection(const TcpConnectionPtr &conn, const AbstractProtocolPtr &message)
@@ -87,9 +95,38 @@ void RpcChannel::onRead(const AbstractProtocolPtr &message)
 {
     auto rsp_protocol = std::dynamic_pointer_cast<TinyPBProtocol>(message);
     LOG_INFO << rsp_protocol->m_msg_id << " | success get rpc response, method name [" << rsp_protocol->m_method_name << "]";
-    if (m_done) {
-        m_done->Run();
+
+    auto controller = std::dynamic_pointer_cast<RpcController>(m_controller);
+
+    if (!m_response->ParseFromString(rsp_protocol->m_pb_data)) {
+        LOG_ERROR << rsp_protocol->m_msg_id << "| ParseFromString error";
+        controller->SetError(ERROR_FAILED_SERIALIZE, "ParseFromString error");
+        return;
     }
+
+    if (rsp_protocol->m_error_code != 0) {
+        LOG_ERROR << rsp_protocol->m_msg_id << "| call rpc method ["
+                  << rsp_protocol->m_method_name << "] failed, error code ["
+                  << rsp_protocol->m_error_code << "], error info ["
+                  << rsp_protocol->m_error_info << "]";
+        controller->SetError(rsp_protocol->m_error_code, rsp_protocol->m_error_info);
+        return;
+    }
+
+    if (m_closure) {
+        m_closure->Run();
+    }
+
+    // auto channel = shared_from_this();
+    // LOG_INFO << channel.use_count();
+    // getTcpClient()->quitLoop();
+    // channel.reset();
+    // LOG_INFO << channel.use_count();
+}
+
+TcpClient *RpcChannel::getTcpClient() const
+{
+    return m_client.get();
 }
 
 }// namespace mrpc

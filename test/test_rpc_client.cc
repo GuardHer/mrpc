@@ -1,8 +1,12 @@
 #include "src/common/config.h"
 #include "src/common/log.h"
+#include "src/common/msg_id_util.h"
 #include "src/net/coder/abstract_protocol.h"
 #include "src/net/coder/tinypb_coder.h"
 #include "src/net/coder/tinypb_protocol.h"
+#include "src/net/rpc/rpc_channel.h"
+#include "src/net/rpc/rpc_closure.h"
+#include "src/net/rpc/rpc_controller.h"
 #include "src/net/rpc/rpc_dispatcher.h"
 #include "src/net/tcp/net_addr.h"
 #include "src/net/tcp/tcp_client.h"
@@ -79,6 +83,42 @@ void test_tcp_client()
     cli.connect();
 }
 
+void test_msg_id()
+{
+    LOG_INFO << "msg_id: " << mrpc::MsgIdUtil::GenMsgId();
+    LOG_INFO << "msg_id: " << mrpc::MsgIdUtil::GenMsgId();
+}
+
+void test_rpc_channel()
+{
+    using namespace mrpc;
+    IPNetAddr::s_ptr addr = std::make_shared<IPNetAddr>("127.0.0.1", 12345);
+    std::shared_ptr<RpcChannel> channel = std::make_shared<RpcChannel>(addr);
+
+    std::shared_ptr<makeOrderRequest> request = std::make_shared<makeOrderRequest>();
+    request->set_price(100);
+    request->set_goods("apple");
+    std::shared_ptr<makeOrderResponse> response = std::make_shared<makeOrderResponse>();
+    std::shared_ptr<RpcController> controller = std::make_shared<RpcController>();
+    controller->SetMsgId(mrpc::MsgIdUtil::GenMsgId());
+
+    std::function<void()> reply_package_func = [channel, request, response]() mutable {
+        LOG_INFO << "call rpc success";
+        auto req_string = request->DebugString();
+        auto rsp_string = response->DebugString();
+        LOG_INFO << "request: " << req_string << ", len: " << req_string.length();
+        LOG_INFO << "response: " << rsp_string << ", len: " << rsp_string.length();
+        channel->getTcpClient()->quitLoop();
+        channel.reset();
+    };
+    std::shared_ptr<RpcClosure<void>> done = std::make_shared<RpcClosure<void>>(reply_package_func);
+
+    channel->Init(controller, request, response, done);
+
+    Order_Stub stub(channel.get());
+    stub.makeOrder(controller.get(), request.get(), response.get(), done.get());
+}
+
 int main()
 {
     mrpc::Config::SetGlobalConfig("../conf/mrpc.xml");
@@ -88,7 +128,11 @@ int main()
     //test_tcp_connection();
 
     // tcp client
-    test_tcp_client();
+    // test_tcp_client();
+
+    // tcp channel
+    // test_msg_id();
+    test_rpc_channel();
 
     return 0;
 }

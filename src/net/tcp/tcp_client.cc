@@ -27,6 +27,7 @@ TcpClient::TcpClient(NetAddr::s_ptr peer_addr)
 
 TcpClient::~TcpClient()
 {
+    LOG_INFO << "~TcpClient";
     if (m_fd) {
         ::close(m_fd);
     }
@@ -91,6 +92,14 @@ void TcpClient::readMessage(const std::string &msg_id)
     // 从buffer里 decode 得到message
     m_conn->pushReadMessage(msg_id, m_read_callback);
     m_conn->listenRead();
+}
+
+void TcpClient::quitLoop()
+{
+    if (m_event_loop->isLooping()) {
+        m_event_loop->quit();
+        m_event_loop->wakeup();
+    }
 }
 
 TcpClient::addr_pair TcpClient::getSocketLocalAddr()

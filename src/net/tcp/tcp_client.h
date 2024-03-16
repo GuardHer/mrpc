@@ -16,6 +16,7 @@ class TcpClient
 {
 public:
     typedef std::pair<std::string, uint16_t> addr_pair;
+	typedef std::shared_ptr<TcpClient> s_ptr;
 
 public:
     TcpClient(NetAddr::s_ptr peer_addr);
@@ -29,6 +30,9 @@ public:
 
     /// @brief 发送 message 成功, done 会被执行
     void readMessage(const std::string &msg_id);
+
+    /// @brief 退出 loop
+    void quitLoop();
 
     void setConnectionCallBack(const ConnectionCallback &cb) { m_conn_callback = cb; }
     void setCloseCallBack(const CloseCallback &cb) { m_close_callback = cb; }
