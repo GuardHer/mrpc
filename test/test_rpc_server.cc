@@ -27,6 +27,7 @@ public:
                    ::makeOrderResponse *response,
                    ::google::protobuf::Closure *done)
     {
+        // sleep(3);
         if (request->price() < 10) {
             response->set_ret_code(-1);
             response->set_res_info("short balance");

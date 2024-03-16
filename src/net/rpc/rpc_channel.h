@@ -5,6 +5,7 @@
 #include "src/net/rpc/rpc_closure.h"
 #include "src/net/tcp/net_addr.h"
 #include "src/net/tcp/tcp_client.h"
+#include "src/net/timer_event.h"
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/service.h>
 
@@ -12,6 +13,10 @@
 
 namespace mrpc
 {
+
+#define NEWMESSAGE(type, var_name) \
+    std::shared_ptr<type> var_name = std::make_shared<type>()
+
 
 class RpcChannel : public google::protobuf::RpcChannel, public std::enable_shared_from_this<RpcChannel>
 {
@@ -41,6 +46,8 @@ private:
 
     void onRead(const AbstractProtocolPtr &message);
 
+    void onTimeout();
+
 private:
     bool m_is_init{false};
     NetAddr::s_ptr m_peer_addr{nullptr};         // 对端地址
@@ -50,6 +57,7 @@ private:
     message_s_ptr m_request{nullptr};            // request
     message_s_ptr m_response{nullptr};           // response
     closure_s_ptr m_closure{nullptr};            // done
+    TimerEvent::s_ptr m_timer_event{nullptr};    //
 };
 
 }// namespace mrpc

@@ -31,7 +31,7 @@ void RpcChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
         return;
     }
 
-    // 设置 m_msg_id 和 m_msg_id_len
+    /// 设置 m_msg_id 和 m_msg_id_len
     if (my_controller->GetMsgId().empty()) {
         req_protocol->m_msg_id = MsgIdUtil::GenMsgId();
         my_controller->SetMsgId(req_protocol->m_msg_id);
@@ -40,12 +40,12 @@ void RpcChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
     }
     req_protocol->m_msg_id_len = static_cast<int32_t>(req_protocol->m_msg_id.length());
 
-    // 设置 method_name 和 m_method_len
+    /// 设置 method_name 和 m_method_len
     req_protocol->m_method_name = method->full_name();
     req_protocol->m_method_len = static_cast<int32_t>(req_protocol->m_method_name.length());
     LOG_INFO << req_protocol->m_msg_id << " | call method name [" << req_protocol->m_method_name << "]";
 
-    // 序列化
+    /// 序列化
     if (!request->SerializeToString(&(req_protocol->m_pb_data))) {
         std::string err_info = "failed to SerializeToString";
         my_controller->SetError(ERROR_FAILED_SERIALIZE, err_info);
@@ -53,12 +53,15 @@ void RpcChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
         return;
     }
 
-    // 设置 req_protocol->m_pk_len
+    /// 设置 req_protocol->m_pk_len
     int32_t pb_data_len = static_cast<int32_t>(req_protocol->m_pb_data.length());
     req_protocol->m_pk_len = 26 + pb_data_len + req_protocol->m_method_len + req_protocol->m_msg_id_len + req_protocol->m_error_info_len;
 
+    /// 定时任务
+    m_timer_event = std::make_shared<TimerEvent>(my_controller->GetTimeout(), false, std::bind(&RpcChannel::onTimeout, this));
+    m_client->addTimerEvent(m_timer_event);
 
-    // 创建 client
+    /// 创建 client
     m_client->setConnectionCallBack(std::bind(&RpcChannel::onConnection, this, std::placeholders::_1, req_protocol));
     m_client->setWriteCompleteCallBack(std::bind(&RpcChannel::onWriteComplete, this, std::placeholders::_1));
     m_client->setReadCallBack(std::bind(&RpcChannel::onRead, this, std::placeholders::_1));
@@ -81,6 +84,18 @@ void RpcChannel::Init(controller_s_ptr controller, message_s_ptr req, message_s_
 
 void RpcChannel::onConnection(const TcpConnectionPtr &conn, const AbstractProtocolPtr &message)
 {
+    auto controller = std::dynamic_pointer_cast<RpcController>(m_controller);
+
+    if (m_client->getConnectErrorCode() != 0) {
+        LOG_INFO << message->m_msg_id << " | connect to ["
+                 << m_client->getPeerAddr()->toString() << "] failed, erroe code ["
+                 << m_client->getConnectErrorCode()
+                 << "], error info [" << m_client->getConnectErrorInfo() << "]";
+        controller->SetError(m_client->getConnectErrorCode(), m_client->getConnectErrorInfo());
+        // m_client->quitLoop();
+        return;
+    }
+
     m_client->writeMessage(message);
     m_client->readMessage(message->m_msg_id);
 }
@@ -94,9 +109,12 @@ void RpcChannel::onWriteComplete(const AbstractProtocolPtr &message)
 void RpcChannel::onRead(const AbstractProtocolPtr &message)
 {
     auto rsp_protocol = std::dynamic_pointer_cast<TinyPBProtocol>(message);
+    auto controller = std::dynamic_pointer_cast<RpcController>(m_controller);
+
     LOG_INFO << rsp_protocol->m_msg_id << " | success get rpc response, method name [" << rsp_protocol->m_method_name << "]";
 
-    auto controller = std::dynamic_pointer_cast<RpcController>(m_controller);
+    // rpc调用成功, 取消超时定时任务
+    m_timer_event->setCancle(true);
 
     if (!m_response->ParseFromString(rsp_protocol->m_pb_data)) {
         LOG_ERROR << rsp_protocol->m_msg_id << "| ParseFromString error";
@@ -113,15 +131,30 @@ void RpcChannel::onRead(const AbstractProtocolPtr &message)
         return;
     }
 
+
+    // 如果没有被取消
+    if (!controller->IsCanceled() && m_closure) {
+        m_closure->Run();
+    }
+
+    auto channel = shared_from_this();
+    channel.reset();
+}
+
+void RpcChannel::onTimeout()
+{
+    auto my_controller = std::dynamic_pointer_cast<RpcController>(m_controller);
+    int32_t err_code = ERROR_RPC_CALL_TIMEOUT;
+    std::string err_info = "rpc call timeout " + std::to_string(my_controller->GetTimeout());
+    my_controller->StartCancel();
+    my_controller->SetError(err_code, err_info);
+
     if (m_closure) {
         m_closure->Run();
     }
 
-    // auto channel = shared_from_this();
-    // LOG_INFO << channel.use_count();
-    // getTcpClient()->quitLoop();
-    // channel.reset();
-    // LOG_INFO << channel.use_count();
+    auto channel = shared_from_this();
+    channel.reset();
 }
 
 TcpClient *RpcChannel::getTcpClient() const

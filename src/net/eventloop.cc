@@ -5,33 +5,32 @@
 #include <sys/eventfd.h>
 #include <sys/socket.h>
 
-#define ADD_TO_EPOLL()                                                                                         \
-    auto it = m_listen_fds.find(event->getFd());                                                               \
-    int op = EPOLL_CTL_ADD;                                                                                    \
-    if (it != m_listen_fds.end()) {                                                                            \
-        op = EPOLL_CTL_MOD;                                                                                    \
-    }                                                                                                          \
-    epoll_event tmp = event->getEpollEvent();                                                                  \
-    int ret = epoll_ctl(m_epoll_fd, op, event->getFd(), &tmp);                                                 \
-    if (ret < 0) {                                                                                             \
-        LOG_ERROR << "op: " << op;                                                                             \
-        LOG_ERROR << "failed epoll_ctl when add fd " << event->getFd() << ", error info: " << strerror(errno); \
-    }                                                                                                          \
-    m_listen_fds.insert(event->getFd());                                                                       \
+#define ADD_TO_EPOLL()                                                                                                      \
+    auto it = m_listen_fds.find(event->getFd());                                                                            \
+    int op = EPOLL_CTL_ADD;                                                                                                 \
+    if (it != m_listen_fds.end()) {                                                                                         \
+        op = EPOLL_CTL_MOD;                                                                                                 \
+    }                                                                                                                       \
+    epoll_event tmp = event->getEpollEvent();                                                                               \
+    int ret = epoll_ctl(m_epoll_fd, op, event->getFd(), &tmp);                                                              \
+    if (ret < 0) {                                                                                                          \
+        LOG_ERROR << "failed ADD_TO_EPOLL epoll_ctl when add fd " << event->getFd() << ", error info: " << strerror(errno); \
+    }                                                                                                                       \
+    m_listen_fds.insert(event->getFd());                                                                                    \
     LOG_DEBUG << "add event success! fd: " << event->getFd();
 
-#define DEL_TO_EPOLL()                                                                                         \
-    auto it = m_listen_fds.find(event->getFd());                                                               \
-    if (it == m_listen_fds.end()) {                                                                            \
-        return;                                                                                                \
-    }                                                                                                          \
-    int op = EPOLL_CTL_DEL;                                                                                    \
-    epoll_event tmp = event->getEpollEvent();                                                                  \
-    int ret = epoll_ctl(m_epoll_fd, op, event->getFd(), &tmp);                                                 \
-    if (ret < 0) {                                                                                             \
-        LOG_ERROR << "failed epoll_ctl when del fd " << event->getFd() << ", error info: " << strerror(errno); \
-    }                                                                                                          \
-    m_listen_fds.erase(event->getFd());                                                                        \
+#define DEL_TO_EPOLL()                                                                                                      \
+    auto it = m_listen_fds.find(event->getFd());                                                                            \
+    if (it == m_listen_fds.end()) {                                                                                         \
+        return;                                                                                                             \
+    }                                                                                                                       \
+    int op = EPOLL_CTL_DEL;                                                                                                 \
+    epoll_event tmp = event->getEpollEvent();                                                                               \
+    int ret = epoll_ctl(m_epoll_fd, op, event->getFd(), &tmp);                                                              \
+    if (ret < 0) {                                                                                                          \
+        LOG_ERROR << "failed DEL_TO_EPOLL epoll_ctl when del fd " << event->getFd() << ", error info: " << strerror(errno); \
+    }                                                                                                                       \
+    m_listen_fds.erase(event->getFd());                                                                                     \
     LOG_DEBUG << "del event success! fd: " << event->getFd();
 
 
@@ -119,12 +118,18 @@ void EventLoop::loop()
                 // 读事件
                 if (trigger_event.events & EPOLLIN) {
                     // 添加读事件到任务队列
-                    addTask(fd_event->getReadCollback());
+                    addTask(fd_event->getReadCallback());
                 }
                 // 写事件
                 if (trigger_event.events & EPOLLOUT) {
                     // 添加写事件到任务队列
-                    addTask(fd_event->getWriteCollback());
+                    addTask(fd_event->getWriteCallback());
+                }
+
+                // 错误处理
+                if (trigger_event.events & EPOLLERR) {
+                    LOG_DEBUG << "fd: " << fd_event->getFd() << " tigger EPOLLERR event";
+                    addTask(fd_event->getErrorCallback());
                 }
             }
         }

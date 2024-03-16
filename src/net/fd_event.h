@@ -13,6 +13,7 @@ public:
     {
         EVENT_IN = EPOLLIN,
         EVENT_OUT = EPOLLOUT,
+        EVENT_ERR = EPOLLERR,// 不需要主动添加
     };
 
 public:
@@ -50,26 +51,34 @@ public:
 
     /// @brief 设置读回调函数
     /// @param cb
-    void setReadCollback(std::function<void()> cb) { m_read_callback = std::move(cb); }
+    void setReadCallback(std::function<void()> cb) { m_read_callback = std::move(cb); }
 
     /// @brief 设置写回调函数
     /// @param cb
-    void setWriteCollback(std::function<void()> cb) { m_write_callback = std::move(cb); }
+    void setWriteCallback(std::function<void()> cb) { m_write_callback = std::move(cb); }
+
+    /// @brief 设置错误回调函数
+    /// @param cb
+    void setErrorCallback(std::function<void()> cb) { m_error_callback = std::move(cb); };
 
     /// @brief 获取读回调函数
     /// @return m_read_callback
-    std::function<void()> getReadCollback() const { return m_read_callback; }
+    std::function<void()> getReadCallback() const { return m_read_callback; }
 
     /// @brief 获取写回到函数
     /// @return m_write_callback
-    std::function<void()> getWriteCollback() const { return m_write_callback; }
+    std::function<void()> getWriteCallback() const { return m_write_callback; }
 
+    /// @brief 获取错误回到函数
+    /// @return m_error_callback
+    std::function<void()> getErrorCallback() const { return m_error_callback; }
 
 private:
     int m_fd{-1};
     epoll_event m_listen_events;
-    std::function<void()> m_read_callback;
-    std::function<void()> m_write_callback;
+    std::function<void()> m_read_callback{nullptr};
+    std::function<void()> m_write_callback{nullptr};
+    std::function<void()> m_error_callback{nullptr};
 };
 }// namespace mrpc
 

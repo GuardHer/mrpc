@@ -102,8 +102,12 @@ void test_rpc_channel()
     std::shared_ptr<RpcController> controller = std::make_shared<RpcController>();
     controller->SetMsgId(mrpc::MsgIdUtil::GenMsgId());
 
-    std::function<void()> reply_package_func = [channel, request, response]() mutable {
-        LOG_INFO << "call rpc success";
+    std::function<void()> reply_package_func = [controller, channel, request, response]() mutable {
+        if (controller->GetErrorCode() == 0) {
+            LOG_INFO << "call rpc success";
+        } else {
+            LOG_INFO << "call rpc failed, error info: " << controller->GetErrorInfo();
+        }
         auto req_string = request->DebugString();
         auto rsp_string = response->DebugString();
         LOG_INFO << "request: " << req_string << ", len: " << req_string.length();
@@ -116,6 +120,8 @@ void test_rpc_channel()
     channel->Init(controller, request, response, done);
 
     Order_Stub stub(channel.get());
+
+    controller->SetTimeout(1000);
     stub.makeOrder(controller.get(), request.get(), response.get(), done.get());
 }
 

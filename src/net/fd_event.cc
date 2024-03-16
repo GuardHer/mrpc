@@ -26,9 +26,12 @@ void FdEvent::handler(TriggerEvent event_type)
     if (event_type == TriggerEvent::EVENT_IN) {
         if (m_read_callback)
             m_read_callback();
-    } else {
+    } else if (event_type == TriggerEvent::EVENT_OUT) {
         if (m_write_callback)
             m_write_callback();
+    } else if (event_type == TriggerEvent::EVENT_ERR) {
+        if (m_error_callback)
+            m_error_callback();
     }
 }
 void FdEvent::listen(TriggerEvent event_type, std::function<void()> callback)
