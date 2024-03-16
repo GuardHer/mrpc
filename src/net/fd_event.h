@@ -34,6 +34,9 @@ public:
     /// @param event_type
     void cancle(TriggerEvent event_type);
 
+    /// @brief 取消此fd_event
+    void unregisterFromLoop();
+
     /// @brief 获取fd
     /// @return  m_fd
     int getFd() const { return m_fd; }

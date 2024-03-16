@@ -58,6 +58,10 @@ void FdEvent::cancle(TriggerEvent event_type)
     }
 }
 
+void FdEvent::unregisterFromLoop()
+{
+}
+
 void FdEvent::setNonBlocking()
 {
     int flags = fcntl(m_fd, F_GETFL, 0);

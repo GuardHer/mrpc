@@ -24,6 +24,8 @@ private:
 
     void onAccept();
 
+    void onClientClose(const TcpConnectionPtr &conn);
+
 private:
     TcpAcceptor::s_ptr m_acceptor;
     NetAddr::s_ptr m_addr;// listen addr

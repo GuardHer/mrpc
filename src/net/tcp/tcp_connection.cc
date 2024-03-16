@@ -29,7 +29,11 @@ TcpConnection::TcpConnection(EventLoop *event_loop, int fd, int buffer_size, Net
 
 TcpConnection::~TcpConnection()
 {
-    LOG_DEBUG << "~TcpConnection";
+    LOG_DEBUG << "~TcpConnection, addr: " << this->m_peer_addr->toString();
+    m_peer_addr.reset();
+    m_local_addr.reset();
+    m_in_buffer.reset();
+    m_out_buffer.reset();
     if (m_coder) {
         delete m_coder;
         m_coder = nullptr;
@@ -88,6 +92,10 @@ void TcpConnection::onRead()
         // TODO: 处理关闭连接
         clear();
         LOG_DEBUG << "peer closed, peer addr: " << m_peer_addr->toString();
+        ::close(m_fd_event->getFd());
+        if (m_close_cb) {
+            m_close_cb(shared_from_this());
+        }
         return;
     }
 
@@ -219,6 +227,8 @@ void TcpConnection::clear()
     m_fd_event->cancle(FdEvent::EVENT_OUT);
     m_event_loop->delEpollEvent(m_fd_event);
     m_state = ConnState::Closed;
+
+    // ::close(m_fd_event->getFd());
 }
 
 void TcpConnection::shutdown()

@@ -29,7 +29,7 @@ enum ConnType
     ConnByClient = 2,// client
 };
 
-class TcpConnection
+class TcpConnection : public std::enable_shared_from_this<TcpConnection>
 {
 public:
     typedef std::shared_ptr<TcpConnection> s_ptr;
@@ -77,6 +77,9 @@ public:
     /// @return m_conn_type
     ConnType getConnType() const { return m_conn_type; }
 
+    void setCloseCallback(CloseCallback cb) { m_close_cb = std::move(cb); }
+    CloseCallback getCloseCallback() const { return m_close_cb; }
+
     void pushWriteMessage(write_callback_pair cb_pair) { m_write_callbask.push_back(cb_pair); }
     void pushReadMessage(const std::string &msg_id, ReadCallback cb) { m_read_callbask.insert(std::make_pair(msg_id, cb)); }
 
@@ -95,7 +98,8 @@ private:
     ConnState m_state{ConnState::Connected};     //
     ConnType m_conn_type{ConnType::ConnByServer};//
     AbstractCoder *m_coder{nullptr};             // 编解码
-    // std::pair<AbstractProtocol::s_ptr, std::function<AbstractProtocol::s_ptr>>;
+    CloseCallback m_close_cb;                    // 关闭连接回调, 用于客户端关闭连接后, 服务端正确的删除这个连接
+
     std::vector<write_callback_pair> m_write_callbask;
     std::map<std::string, ReadCallback> m_read_callbask;
 };

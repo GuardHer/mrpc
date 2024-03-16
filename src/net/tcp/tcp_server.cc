@@ -61,8 +61,21 @@ void TcpServer::onAccept()
     IOThread *io_thread = m_io_threads->getIOThread();
     TcpConnection::s_ptr conn = std::make_shared<TcpConnection>(io_thread->getEventLoop(), client_fd, 1024, peer_addr, m_addr);
     conn->setState(ConnState::Connected);
+    conn->setCloseCallback(std::bind(&TcpServer::onClientClose, this, std::placeholders::_1));
     m_clients.insert(conn);
+
     LOG_INFO << "TcpServer succ get client, fd: " << client_fd << ", all client count: " << m_client_counts;
+}
+
+void TcpServer::onClientClose(const TcpConnectionPtr &conn)
+{
+    LOG_INFO << "delete conn: " << conn->getPeerAddr()->toString();
+    LOG_INFO << "conn.count: " << conn.use_count();
+
+    auto size = m_clients.erase(conn);
+
+    LOG_INFO << "conn.count: " << conn.use_count();
+    LOG_INFO << "success delete count: " << size << ", current client count: " << m_clients.size();
 }
 
 }// namespace mrpc

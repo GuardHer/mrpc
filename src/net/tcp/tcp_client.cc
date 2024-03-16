@@ -53,7 +53,7 @@ void TcpClient::connect()
     } else if (rt == -1) {
         if (errno == EINPROGRESS) {
             // epoll 监听可写事件, 判断错误码
-            m_fd_event->listen(FdEvent::EVENT_OUT, std::bind(&TcpClient::writeCb, this));
+            m_fd_event->listen(FdEvent::EVENT_OUT, std::bind(&TcpClient::writeCb2, this));
             m_fd_event->setErrorCallback(std::bind(&TcpClient::errorCb, this));
             m_event_loop->addEpollEvent(m_fd_event);
 
@@ -125,7 +125,6 @@ void TcpClient::writeCb2()
 
 
     // 链接成功后先删除epoll事件
-    LOG_DEBUG << m_fd;
     m_event_loop->delEpollEvent(m_fd_event);
     // 执行连接完成回调
     if (m_conn_callback) m_conn_callback(m_conn, nullptr);
@@ -164,13 +163,13 @@ void TcpClient::addTimerEvent(TimerEvent::s_ptr timer_event)
 }
 
 
-
 void TcpClient::initSocketLocalAddr()
 {
     sockaddr_in local_addr_in;
-    socklen_t local_addr_len;
+    socklen_t local_addr_len = sizeof(local_addr_in);
     if (::getsockname(m_fd, reinterpret_cast<sockaddr *>(&local_addr_in), &local_addr_len) == -1) {
-        LOG_ERROR << "Error in getsockname : " << strerror(errno);
+        LOG_ERROR << "Error in getsockname : " << strerror(errno) << ", fd: " << m_fd;
+
         return;
     }
 
