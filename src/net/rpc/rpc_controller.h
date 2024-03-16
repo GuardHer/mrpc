@@ -56,11 +56,11 @@ public:
 
     /// @brief 设置msg_id
     /// @param msg_id
-    void SetReqId(const std::string &msg_id);
+    void SetMsgId(const std::string &msg_id);
 
     /// @brief 获取 msg_id
     /// @return m_msg_id
-    std::string GetReqId() const;
+    std::string GetMsgId() const;
 
     /// @brief 设置本地地址
     /// @param addr

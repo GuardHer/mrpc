@@ -30,6 +30,7 @@ set(LIBS
 # common目录源文件
 set(SOURCE_FILE_COMMON
     ${PROJECT_SOURCE_DIR}/src/common/util.cc
+    ${PROJECT_SOURCE_DIR}/src/common/msg_id_util.cc
     ${PROJECT_SOURCE_DIR}/src/common/log.cc
     ${PROJECT_SOURCE_DIR}/src/common/log_stream.cc
 	${PROJECT_SOURCE_DIR}/src/common/config.cc

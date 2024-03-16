@@ -84,7 +84,7 @@ void RpcDispatcher::dispatch(const AbstractProtocol::s_ptr &request, AbstractPro
 
     rpcController.SetLocalAddr(conn->getLocalAddr());
     rpcController.SetPeerAddr(conn->getPeerAddr());
-    rpcController.SetReqId(req_protocol->m_msg_id);
+    rpcController.SetMsgId(req_protocol->m_msg_id);
 
     std::function<void()> reply_package_func = []() {
         LOG_INFO << "reply_package_func";

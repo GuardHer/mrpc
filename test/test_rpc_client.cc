@@ -28,10 +28,10 @@ void test_tcp_client()
     TcpClient cli(addr);
 
 
-    auto conn_fun = [&cli](const TcpConnectionPtr &conn) {
+    auto conn_fun = [&cli](const TcpConnectionPtr &conn, const AbstractProtocolPtr &protocol) {
         LOG_INFO << conn->getState() << ", conn_fun conn success!";
-
-        std::shared_ptr<TinyPBProtocol> message = std::make_shared<TinyPBProtocol>();
+        // std::shared_ptr<TinyPBProtocol> message = std::make_shared<TinyPBProtocol>();
+        auto message = std::dynamic_pointer_cast<TinyPBProtocol>(protocol);
         message->m_msg_id = "99998888";
         message->m_msg_id_len = static_cast<int32_t>(message->m_msg_id.length());
         message->m_check_sum = int32_t(456);

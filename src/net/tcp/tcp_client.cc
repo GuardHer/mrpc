@@ -38,7 +38,7 @@ void TcpClient::connect()
     if (rt == 0) {
         LOG_DEBUG << "connect [" << m_peer_addr->toString() << "] success!";
         m_conn->setState(ConnState::Connected);
-        if (m_conn_callback) m_conn_callback(m_conn);
+        if (m_conn_callback) m_conn_callback(m_conn, nullptr);
     } else if (rt == -1) {
         if (errno == EINPROGRESS) {
             // epoll 监听可写事件, 判断错误码
@@ -63,7 +63,7 @@ void TcpClient::connect()
                 m_event_loop->addEpollEvent(m_fd_event);
 
                 if (is_conned) {
-                    if (m_conn_callback) m_conn_callback(m_conn);
+                    if (m_conn_callback) m_conn_callback(m_conn, nullptr);
                 }
             });
             m_event_loop->addEpollEvent(m_fd_event);

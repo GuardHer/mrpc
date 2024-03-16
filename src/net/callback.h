@@ -15,7 +15,7 @@ typedef std::shared_ptr<AbstractProtocol> AbstractProtocolPtr;
 typedef std::shared_ptr<TcpConnection> TcpConnectionPtr;
 
 typedef std::function<void(const TcpConnectionPtr &)> CloseCallback;
-typedef std::function<void(const TcpConnectionPtr &)> ConnectionCallback;
+typedef std::function<void(const TcpConnectionPtr &, const AbstractProtocolPtr &)> ConnectionCallback;
 typedef std::function<void(const AbstractProtocolPtr &)> WriteCompleteCallback;
 typedef std::function<void(const AbstractProtocolPtr &)> ReadCallback;
 typedef std::function<void(const AbstractProtocolPtr &, TcpBuffer *)> MessageCallback;

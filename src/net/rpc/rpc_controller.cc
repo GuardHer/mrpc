@@ -59,6 +59,7 @@ void RpcController::SetError(int32_t error_code, const std::string &error_info)
 {
     m_error_code = error_code;
     m_error_info = error_info;
+    m_is_failed = true;
 }
 
 int32_t RpcController::GetErrorCode() const
@@ -71,12 +72,12 @@ std::string RpcController::GetErrorInfo() const
     return m_error_info;
 }
 
-void RpcController::SetReqId(const std::string &msg_id)
+void RpcController::SetMsgId(const std::string &msg_id)
 {
     m_msg_id = msg_id;
 }
 
-std::string RpcController::GetReqId() const
+std::string RpcController::GetMsgId() const
 {
     return m_msg_id;
 }
