@@ -16,6 +16,7 @@ class RpcDispatcher
 {
 public:
     typedef std::shared_ptr<google::protobuf::Service> service_s_ptr;
+    static RpcDispatcher *GetRpcDispatcher();
 
 public:
     /// @brief

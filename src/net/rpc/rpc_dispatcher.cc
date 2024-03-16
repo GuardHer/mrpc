@@ -10,12 +10,22 @@
 
 namespace mrpc
 {
+static RpcDispatcher *g_rpc_dispatcher = nullptr;
+RpcDispatcher *RpcDispatcher::GetRpcDispatcher()
+{
+    if (g_rpc_dispatcher) {
+        return g_rpc_dispatcher;
+    }
+    g_rpc_dispatcher = new RpcDispatcher();
+    return g_rpc_dispatcher;
+}
 
 
 void RpcDispatcher::dispatch(const AbstractProtocol::s_ptr &request, AbstractProtocol::s_ptr response, const TcpConnection *conn)
 {
     if (!request || !response) {
         // TODO
+        LOG_ERROR;
     }
 
     std::shared_ptr<TinyPBProtocol> req_protocol = std::dynamic_pointer_cast<TinyPBProtocol>(request);
@@ -34,6 +44,7 @@ void RpcDispatcher::dispatch(const AbstractProtocol::s_ptr &request, AbstractPro
         // 解析错误
         LOG_ERROR << "[" << req_protocol->m_req_id << "] parse service_name or method_name failed: " << full_name;
         setTinyPBError(rsp_protocol, ERROR_PARSE_SERVICE_NAME, "parse service_name or method_name failed");
+
         return;
     }
 
@@ -118,7 +129,7 @@ void RpcDispatcher::registerService(const service_s_ptr &service)
 bool RpcDispatcher::parseServiceFullName(const std::string &full_name, std::string &service_name, std::string &method_name)
 {
     if (full_name.empty()) {
-        LOG_ERROR << "full_name is empty!";
+        LOG_ERROR << "full_name is empty! " << full_name;
         return false;
     }
     auto index = full_name.find_last_of(".");

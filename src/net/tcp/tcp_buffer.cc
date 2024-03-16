@@ -15,7 +15,6 @@ TcpBuffer::TcpBuffer(int size) : m_size(size)
 
 TcpBuffer::TcpBuffer(const std::string &buf)
 {
-    m_buffer.resize(buf.size());
     wirteToBuffer(buf);
 }
 
@@ -134,13 +133,7 @@ std::string TcpBuffer::peekAsString(int start_index, int end_index)
     if (readAble() == 0) return std::string();
     int size = end_index - start_index + 1;
 
-    // 如果 可读的字节数 > 需要读的, 就读size, 反之读readAble()
-    int read_size = readAble() > size ? size : readAble();
-
-    std::string tmp;
-    tmp.assign(&m_buffer[m_read_index + start_index], read_size);
-
-    return tmp;
+    return peekAsString(size);
 }
 
 void TcpBuffer::peekAsVector(std::vector<char> &re, int size)

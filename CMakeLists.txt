@@ -63,6 +63,11 @@ set(SOURCE_FILE_NET
 
 )
 
+# test目录源文件
+set(SOURCE_FILE_TEST
+	${PROJECT_SOURCE_DIR}/test/order.pb.cc
+)
+
 # 生成库文件
 # add_library(mrpc_common STATIC ${SOURCE_FILE_COMMON})
 
@@ -122,3 +127,21 @@ add_executable(client_test
 	${PROJECT_SOURCE_DIR}/test/test_client.cc
 )
 target_link_libraries(client_test ${LIBS})
+
+# test_rpc_server
+add_executable(rpc_server_test
+	${SOURCE_FILE_COMMON} 
+	${SOURCE_FILE_NET}
+	${SOURCE_FILE_TEST}
+	${PROJECT_SOURCE_DIR}/test/test_rpc_server.cc
+)
+target_link_libraries(rpc_server_test ${LIBS})
+
+# test_rpc_client
+add_executable(rpc_client_test
+	${SOURCE_FILE_COMMON} 
+	${SOURCE_FILE_NET}
+	${SOURCE_FILE_TEST}
+	${PROJECT_SOURCE_DIR}/test/test_rpc_client.cc
+)
+target_link_libraries(rpc_client_test ${LIBS})

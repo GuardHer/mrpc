@@ -53,6 +53,7 @@ void TcpClient::connect()
                     m_conn->setState(ConnState::Connected);
                     auto addr_pair = getSocketLocalAddr();
                     auto addr = std::make_shared<IPNetAddr>(addr_pair.first, addr_pair.second);
+                    LOG_DEBUG << "local addr [" << addr_pair.first << ":" << addr_pair.second << "]";
                     m_conn->setLocalAddr(addr);
                 } else {
                     m_fd_event->cancle(FdEvent::EVENT_IN);

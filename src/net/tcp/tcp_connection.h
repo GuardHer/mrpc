@@ -99,7 +99,6 @@ private:
     std::vector<write_callback_pair> m_write_callbask;
     std::map<std::string, ReadCallback> m_read_callbask;
 
-    std::shared_ptr<RpcDispatcher> m_dispatcher;
 };
 
 }// namespace mrpc

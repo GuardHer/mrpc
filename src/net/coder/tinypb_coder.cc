@@ -73,9 +73,9 @@ void TinyPBCoder::decode(std::vector<AbstractProtocol::s_ptr> &out_messages, Tcp
             buffer->moveReadIndex(end_index - start_index + 1);
 
             TcpBuffer buf(str);
-            LOG_DEBUG << buf.readAble() << "; " << pk_len;
             buf.readAsString(1);                                                // PB_START
-            message->m_pk_len = buf.readInt<int32_t>();                         // m_pk_len
+            message->m_pk_len = pk_len;                                         // m_pk_len
+            buf.readInt<int32_t>();                                             //
             message->m_req_id_len = buf.readInt<int32_t>();                     // m_req_id_len
             message->m_req_id = buf.readAsString(message->m_req_id_len);        // m_req_id
             message->m_method_len = buf.readInt<int32_t>();                     // m_method_len
@@ -101,7 +101,6 @@ std::string TinyPBCoder::encodeTinyPB(std::shared_ptr<TinyPBProtocol> message, i
         message->m_req_id = "123456789";
         message->m_req_id_len = static_cast<int32_t>(message->m_req_id.length());
     }
-    LOG_DEBUG << "req_id = " << message->m_req_id;
     int32_t pk_len = 26 + message->m_error_info_len + message->m_method_len + message->m_req_id_len + message->m_pb_data.length();
 
     TcpBuffer buffer(pk_len);
