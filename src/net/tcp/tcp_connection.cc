@@ -14,7 +14,7 @@ TcpConnection::TcpConnection(EventLoop *event_loop, int fd, int buffer_size, Net
 
     m_coder = new TinyPBCoder();
 
-    m_in_buffer = std::make_shared<TcpBuffer>(buffer_size);
+    m_in_buffer  = std::make_shared<TcpBuffer>(buffer_size);
     m_out_buffer = std::make_shared<TcpBuffer>(buffer_size);
 
     // 获取 m_fd_event
@@ -51,7 +51,7 @@ void TcpConnection::onRead()
     }
 
     bool is_read_all = false;
-    bool is_close = false;
+    bool is_close    = false;
     while (!is_read_all) {
         if (m_in_buffer->writAble() == 0) {
             m_in_buffer->resizeBuffer(2 * m_in_buffer->getBufferSize());
@@ -134,7 +134,7 @@ void TcpConnection::excute()
 
         for (auto re: result) {
             std::string msg_id = re->m_msg_id;
-            auto it = m_read_callbask.find(msg_id);
+            auto it            = m_read_callbask.find(msg_id);
             if (it != m_read_callbask.end()) {
                 if (it->second) it->second(re);
             }
@@ -168,9 +168,9 @@ void TcpConnection::onWrite()
             is_write_all = true;
             break;
         }
-        int write_size = m_out_buffer->readAble();
+        int write_size  = m_out_buffer->readAble();
         std::string tmp = m_out_buffer->peekAsString(write_size);
-        int rt = ::write(m_fd, tmp.c_str(), write_size);
+        int rt          = ::write(m_fd, tmp.c_str(), write_size);
         // 发送完了
         if (rt >= write_size) {
             LOG_DEBUG << "no data need to send to client: " << m_peer_addr->toString();

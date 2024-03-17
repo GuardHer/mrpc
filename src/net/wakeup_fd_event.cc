@@ -16,8 +16,8 @@ WakeUpFdEvent::~WakeUpFdEvent()
 void WakeUpFdEvent::wakeup()
 {
     char buf[8] = {'a'};
-    int fd = getFd();
-    int rt = write(fd, buf, 8);
+    int fd      = getFd();
+    int rt      = write(fd, buf, 8);
     if (rt != 8) {
         LOG_ERROR << "write to wakeup fd less than 8 bytes, fd: " << fd;
     }

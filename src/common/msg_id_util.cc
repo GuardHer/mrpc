@@ -9,7 +9,7 @@ namespace mrpc
 {
 
 static int g_msg_id_len = 20;
-static int g_random_fd = -1;
+static int g_random_fd  = -1;
 static thread_local std::string t_msg_id_no;
 static thread_local std::string t_max_msg_id_no;
 
@@ -29,7 +29,7 @@ std::string MsgIdUtil::GenMsgId()
 
         for (int i = 0; i < g_msg_id_len; i++) {
             uint8_t x = (uint8_t) res[i] % 10;
-            res[i] = x + '0';
+            res[i]    = x + '0';
             t_max_msg_id_no += '9';
         }
         t_msg_id_no = res;

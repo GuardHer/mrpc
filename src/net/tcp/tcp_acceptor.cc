@@ -69,7 +69,7 @@ std::pair<int, NetAddr::s_ptr> TcpAcceptor::accept()
         }
 
         IPNetAddr::s_ptr peer_addr = std::make_shared<IPNetAddr>(client_addr);
-        res.second = peer_addr;
+        res.second                 = peer_addr;
 
         LOG_INFO << "a client have accepted success, peer addr: " << peer_addr->toString();
     } else {

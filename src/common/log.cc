@@ -124,7 +124,7 @@ void Logger::InitGlobalLogger()
 {
     if (g_logger == nullptr) {
         LogLevel global_log_level = StringToLogLevel(Config::GetGlobalConfig()->m_log_level);
-        g_logger = new Logger(global_log_level);
+        g_logger                  = new Logger(global_log_level);
     }
 }
 
@@ -132,22 +132,23 @@ void Logger::InitGlobalLogger()
 void Logger::pushLog(const std::string &msg)
 {
     ScopeMutex<Mutex> lock(m_mutex);
-    m_buffer.push(msg);
+    // m_buffer: vector
+    m_buffer.push_back(msg);
     lock.unlock();
 }
 
 void Logger::log()
 {
     ScopeMutex<Mutex> lock(m_mutex);
-    std::queue<std::string> tmp;
+    std::vector<std::string> tmp;
     m_buffer.swap(tmp);
     lock.unlock();
 
-    while (!tmp.empty()) {
-        std::string msg = tmp.front();
-        tmp.pop();
-        printf("%s\n", msg.c_str());
-    }
+    // while (!tmp.empty()) {
+    //     std::string msg = tmp.front();
+    //     tmp.
+    // }
+    // printf("%s\n", msg.c_str());
 }
 
 LogStream &Logging::stream()
@@ -162,7 +163,7 @@ LogStream &Logging::stream()
     strftime(&buf[0], 123, "%y-%m-%d %H:%M:%S", &now_time_t);
     std::string time_str(buf);
 
-    int ms = now_time.tv_usec / 1000;
+    int ms   = now_time.tv_usec / 1000;
     time_str = time_str + "." + std::to_string(ms);
 
     m_stream << levelToColor(m_level) << "[" << LogLevelToString(m_level) << "]" << CLR_CLR

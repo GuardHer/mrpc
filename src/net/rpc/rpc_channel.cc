@@ -25,7 +25,7 @@ void RpcChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
                             google::protobuf::Message *response, google::protobuf::Closure *done)
 {
     std::shared_ptr<TinyPBProtocol> req_protocol = std::make_shared<TinyPBProtocol>();
-    auto my_controller = dynamic_cast<RpcController *>(controller);
+    auto my_controller                           = dynamic_cast<RpcController *>(controller);
     if (my_controller == nullptr) {
         LOG_ERROR << "failed callmethod, RpcController convert error";
         return;
@@ -42,7 +42,7 @@ void RpcChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
 
     /// 设置 method_name 和 m_method_len
     req_protocol->m_method_name = method->full_name();
-    req_protocol->m_method_len = static_cast<int32_t>(req_protocol->m_method_name.length());
+    req_protocol->m_method_len  = static_cast<int32_t>(req_protocol->m_method_name.length());
     LOG_INFO << req_protocol->m_msg_id << " | call method name [" << req_protocol->m_method_name << "]";
 
     /// 序列化
@@ -54,7 +54,7 @@ void RpcChannel::CallMethod(const google::protobuf::MethodDescriptor *method,
     }
 
     /// 设置 req_protocol->m_pk_len
-    int32_t pb_data_len = static_cast<int32_t>(req_protocol->m_pb_data.length());
+    int32_t pb_data_len    = static_cast<int32_t>(req_protocol->m_pb_data.length());
     req_protocol->m_pk_len = 26 + pb_data_len + req_protocol->m_method_len + req_protocol->m_msg_id_len + req_protocol->m_error_info_len;
 
     /// 定时任务
@@ -75,9 +75,9 @@ void RpcChannel::Init(controller_s_ptr controller, message_s_ptr req, message_s_
     }
 
     m_controller = controller;
-    m_request = req;
-    m_response = res;
-    m_closure = done;
+    m_request    = req;
+    m_response   = res;
+    m_closure    = done;
 
     m_is_init = true;
 }
@@ -109,7 +109,7 @@ void RpcChannel::onWriteComplete(const AbstractProtocolPtr &message)
 void RpcChannel::onRead(const AbstractProtocolPtr &message)
 {
     auto rsp_protocol = std::dynamic_pointer_cast<TinyPBProtocol>(message);
-    auto controller = std::dynamic_pointer_cast<RpcController>(m_controller);
+    auto controller   = std::dynamic_pointer_cast<RpcController>(m_controller);
 
     LOG_INFO << rsp_protocol->m_msg_id << " | success get rpc response, method name [" << rsp_protocol->m_method_name << "]";
 
@@ -143,8 +143,8 @@ void RpcChannel::onRead(const AbstractProtocolPtr &message)
 
 void RpcChannel::onTimeout()
 {
-    auto my_controller = std::dynamic_pointer_cast<RpcController>(m_controller);
-    int32_t err_code = ERROR_RPC_CALL_TIMEOUT;
+    auto my_controller   = std::dynamic_pointer_cast<RpcController>(m_controller);
+    int32_t err_code     = ERROR_RPC_CALL_TIMEOUT;
     std::string err_info = "rpc call timeout " + std::to_string(my_controller->GetTimeout());
     my_controller->StartCancel();
     my_controller->SetError(err_code, err_info);

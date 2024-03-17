@@ -11,7 +11,7 @@ class FdEvent
 public:
     enum TriggerEvent
     {
-        EVENT_IN = EPOLLIN,
+        EVENT_IN  = EPOLLIN,
         EVENT_OUT = EPOLLOUT,
         EVENT_ERR = EPOLLERR,// 不需要主动添加
     };

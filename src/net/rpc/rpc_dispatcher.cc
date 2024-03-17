@@ -30,15 +30,15 @@ void RpcDispatcher::dispatch(const AbstractProtocol::s_ptr &request, AbstractPro
 
     std::shared_ptr<TinyPBProtocol> req_protocol = std::dynamic_pointer_cast<TinyPBProtocol>(request);
     std::shared_ptr<TinyPBProtocol> rsp_protocol = std::dynamic_pointer_cast<TinyPBProtocol>(response);
-    std::string full_name = req_protocol->m_method_name;
+    std::string full_name                        = req_protocol->m_method_name;
     std::string service_name;
     std::string method_name;
 
     // 初始化 rsp_protocol
-    rsp_protocol->m_msg_id = req_protocol->m_msg_id;
-    rsp_protocol->m_msg_id_len = req_protocol->m_msg_id_len;
+    rsp_protocol->m_msg_id      = req_protocol->m_msg_id;
+    rsp_protocol->m_msg_id_len  = req_protocol->m_msg_id_len;
     rsp_protocol->m_method_name = req_protocol->m_method_name;
-    rsp_protocol->m_method_len = req_protocol->m_method_len;
+    rsp_protocol->m_method_len  = req_protocol->m_method_len;
 
     if (!parseServiceFullName(full_name, service_name, method_name)) {
         // 解析错误
@@ -57,7 +57,7 @@ void RpcDispatcher::dispatch(const AbstractProtocol::s_ptr &request, AbstractPro
     }
 
     service_s_ptr service = it->second;
-    auto method = service->GetDescriptor()->FindMethodByName(method_name);
+    auto method           = service->GetDescriptor()->FindMethodByName(method_name);
     if (method == nullptr) {
         // method 不存在
         LOG_ERROR << "[" << req_protocol->m_msg_id << "] method not found: " << method_name << ", in service: " << service_name;
@@ -138,7 +138,7 @@ bool RpcDispatcher::parseServiceFullName(const std::string &full_name, std::stri
         return false;
     }
     service_name = full_name.substr(0, index);
-    method_name = full_name.substr(index + 1, full_name.length() - index - 1);
+    method_name  = full_name.substr(index + 1, full_name.length() - index - 1);
 
     LOG_INFO << "parse service_name: " << service_name << ", method_name: " << method_name;
     return true;
@@ -146,8 +146,8 @@ bool RpcDispatcher::parseServiceFullName(const std::string &full_name, std::stri
 
 void RpcDispatcher::setTinyPBError(std::shared_ptr<TinyPBProtocol> message, int32_t error_code, const std::string &error_info)
 {
-    message->m_error_code = error_code;
-    message->m_error_info = error_info;
+    message->m_error_code     = error_code;
+    message->m_error_info     = error_info;
     message->m_error_info_len = static_cast<int32_t>(error_info.length());
 }
 

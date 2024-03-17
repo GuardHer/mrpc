@@ -51,14 +51,14 @@ void TcpServer::start()
 
 void TcpServer::onAccept()
 {
-    auto re = m_acceptor->accept();
+    auto re        = m_acceptor->accept();
     auto client_fd = re.first;
     auto peer_addr = re.second;
     //FdEvent client_fd_event(client_fd);
     m_client_counts++;
 
     // TODO: 把clientfd添加到 IO 线程
-    IOThread *io_thread = m_io_threads->getIOThread();
+    IOThread *io_thread       = m_io_threads->getIOThread();
     TcpConnection::s_ptr conn = std::make_shared<TcpConnection>(io_thread->getEventLoop(), client_fd, 1024, peer_addr, m_addr);
     conn->setState(ConnState::Connected);
     conn->setCloseCallback(std::bind(&TcpServer::onClientClose, this, std::placeholders::_1));

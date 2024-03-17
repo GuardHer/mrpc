@@ -25,7 +25,7 @@ static Config *g_config = nullptr;
 Config::Config(const char *xmlfile)
 {
     XMLDocument *xml_doc = new XMLDocument();
-    XMLError ret = xml_doc->LoadFile(xmlfile);
+    XMLError ret         = xml_doc->LoadFile(xmlfile);
     if (ret != XML_SUCCESS) {
         printf("Start mrpc server error, faild to read config xml file: %s\n", xmlfile);
         exit(0);

@@ -44,8 +44,7 @@ std::string extractFileName(const std::string &absolutePath);
 /// @return color对应的str
 const char *levelToColor(LogLevel level);
 
-class Logger
-{
+class Logger {
 public:
     Logger(LogLevel level = LogLevel::DEBUG) : m_set_level(level) {}
     ~Logger();
@@ -74,13 +73,15 @@ public:
 
 
 private:
-    LogLevel m_set_level;            // 全局日志级别
-    mrpc::Mutex m_mutex;             // 互斥锁
-    std::queue<std::string> m_buffer;// 日志缓存 (mutex)
+    LogLevel m_set_level;             // 全局日志级别
+    mrpc::Mutex m_mutex;              // 互斥锁
+    std::vector<std::string> m_buffer;// 日志缓存 (mutex)
+    std::string m_file_name;          // 日志输出文件名
+    std::string m_file_path;          // 日志输出路径
+    int32_t m_max_file_size{0};       // 日志单个文件最大大小
 };
 
-class Logging
-{
+class Logging {
 public:
 #if __cplusplus >= 202002L
     Logging(LogLevel level, const std::source_location &loc = std::source_location::current())

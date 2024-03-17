@@ -157,7 +157,7 @@ void TcpBuffer::resizeBuffer(int new_size)
     std::copy(beginRead(), beginRead() + count, tmp.begin());
     m_buffer.swap(tmp);
 
-    m_read_index = 0;
+    m_read_index  = 0;
     m_write_index = m_read_index + count;
 }
 
@@ -170,7 +170,7 @@ void TcpBuffer::adjustBuffer()
     std::copy(beginRead(), beginRead() + count, buffer.begin());
 
     m_buffer.swap(buffer);
-    m_read_index = 0;
+    m_read_index  = 0;
     m_write_index = m_read_index + count;
 
     buffer.clear();

@@ -11,7 +11,7 @@ void TinyPBCoder::encode(std::vector<AbstractProtocol::s_ptr> &messages, TcpBuff
 {
     for (auto &message: messages) {
         std::shared_ptr<TinyPBProtocol> msg = std::dynamic_pointer_cast<TinyPBProtocol>(message);
-        int len = 0;
+        int len                             = 0;
         // if (!checkPack(msg)) {
         //     LOG_INFO << "! checkPack";
         //     continue;
@@ -28,17 +28,17 @@ void TinyPBCoder::decode(std::vector<AbstractProtocol::s_ptr> &out_messages, Tcp
     while (1) {
         // 遍历buffer, 找到 PB_START, 解析出整包的长度, 然后得到 PB_END
         std::vector<char> tmp = buffer->buffer();
-        int start_index = buffer->readIndex();
-        int end_index = -1;
+        int start_index       = buffer->readIndex();
+        int end_index         = -1;
 
-        int pk_len = 0;
-        int i = 0;
+        int pk_len      = 0;
+        int i           = 0;
         bool parse_succ = false;
         for (i = start_index; i < buffer->writeIndex(); i++) {
             if (tmp[i] == TinyPBProtocol::PB_START) {
 
                 pk_len = networkToHost32(&tmp[i + 1]);
-                int j = i + pk_len - 1;
+                int j  = i + pk_len - 1;
 
                 LOG_INFO << "get pk_len = " << pk_len << ", i: " << i << ", j: " << j;
 
@@ -49,8 +49,8 @@ void TinyPBCoder::decode(std::vector<AbstractProtocol::s_ptr> &out_messages, Tcp
 
                 if (tmp[j] == TinyPBProtocol::PB_END) {
                     start_index = i;
-                    end_index = j;
-                    parse_succ = true;
+                    end_index   = j;
+                    parse_succ  = true;
                     break;
                 }
             }
@@ -68,25 +68,25 @@ void TinyPBCoder::decode(std::vector<AbstractProtocol::s_ptr> &out_messages, Tcp
             }
             if (buffer->readAble() < pk_len) return;
 
-            auto message = std::make_shared<TinyPBProtocol>();
+            auto message    = std::make_shared<TinyPBProtocol>();
             std::string str = buffer->peekAsString(start_index, end_index);
             buffer->moveReadIndex(end_index - start_index + 1);
 
             TcpBuffer buf(str);
-            buf.readAsString(1);                                                // PB_START
-            message->m_pk_len = pk_len;                                         // m_pk_len
-            buf.readInt<int32_t>();                                             //
-            message->m_msg_id_len = buf.readInt<int32_t>();                     // m_msg_id_len
-            message->m_msg_id = buf.readAsString(message->m_msg_id_len);        // m_msg_id
-            message->m_method_len = buf.readInt<int32_t>();                     // m_method_len
-            message->m_method_name = buf.readAsString(message->m_method_len);   // m_method_name
-            message->m_error_code = buf.readInt<int32_t>();                     // m_error_code
-            message->m_error_info_len = buf.readInt<int32_t>();                 // m_error_info_len
-            message->m_error_info = buf.readAsString(message->m_error_info_len);// m_error_info
-            int32_t pb_data_len = message->m_pk_len - message->m_msg_id_len - message->m_method_len - message->m_error_info_len - 26;
-            message->m_pb_data = buf.readAsString(pb_data_len);// m_pb_data
-            message->m_check_sum = buf.readInt<int32_t>();     // m_check_sum
-            buf.readAsString(1);                               // PB_END
+            buf.readAsString(1);                                                    // PB_START
+            message->m_pk_len = pk_len;                                             // m_pk_len
+            buf.readInt<int32_t>();                                                 //
+            message->m_msg_id_len     = buf.readInt<int32_t>();                     // m_msg_id_len
+            message->m_msg_id         = buf.readAsString(message->m_msg_id_len);    // m_msg_id
+            message->m_method_len     = buf.readInt<int32_t>();                     // m_method_len
+            message->m_method_name    = buf.readAsString(message->m_method_len);    // m_method_name
+            message->m_error_code     = buf.readInt<int32_t>();                     // m_error_code
+            message->m_error_info_len = buf.readInt<int32_t>();                     // m_error_info_len
+            message->m_error_info     = buf.readAsString(message->m_error_info_len);// m_error_info
+            int32_t pb_data_len       = message->m_pk_len - message->m_msg_id_len - message->m_method_len - message->m_error_info_len - 26;
+            message->m_pb_data        = buf.readAsString(pb_data_len);// m_pb_data
+            message->m_check_sum      = buf.readInt<int32_t>();       // m_check_sum
+            buf.readAsString(1);                                      // PB_END
 
             message->parse_success = true;
 
@@ -98,7 +98,7 @@ void TinyPBCoder::decode(std::vector<AbstractProtocol::s_ptr> &out_messages, Tcp
 std::string TinyPBCoder::encodeTinyPB(std::shared_ptr<TinyPBProtocol> message, int &len)
 {
     if (message->m_msg_id.empty()) {
-        message->m_msg_id = "123456789";
+        message->m_msg_id     = "123456789";
         message->m_msg_id_len = static_cast<int32_t>(message->m_msg_id.length());
     }
     int32_t pk_len = 26 + message->m_error_info_len + message->m_method_len + message->m_msg_id_len + message->m_pb_data.length();
@@ -125,10 +125,10 @@ std::string TinyPBCoder::encodeTinyPB(std::shared_ptr<TinyPBProtocol> message, i
 
 bool TinyPBCoder::checkPack(const std::shared_ptr<TinyPBProtocol> &message)
 {
-    int32_t msg_id_len = message->m_msg_id_len;
-    int32_t method_len = message->m_method_len;
+    int32_t msg_id_len     = message->m_msg_id_len;
+    int32_t method_len     = message->m_method_len;
     int32_t error_info_len = message->m_error_info_len;
-    int32_t pk_len = 26 + msg_id_len + method_len + error_info_len + message->m_pb_data.length();
+    int32_t pk_len         = 26 + msg_id_len + method_len + error_info_len + message->m_pb_data.length();
 
 
     if (msg_id_len != static_cast<int32_t>(message->m_msg_id.length())) return false;

@@ -9,7 +9,7 @@ namespace mrpc
 class LogStream
 {
 public:
-    LogStream() = default;
+    LogStream()  = default;
     ~LogStream() = default;
 
     /// @brief 将日志流转换成 std::string

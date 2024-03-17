@@ -13,7 +13,7 @@ TcpClient::TcpClient(NetAddr::s_ptr peer_addr)
     : m_peer_addr(peer_addr)
 {
     m_event_loop = EventLoop::GetCurrentEventLoop();
-    m_fd = ::socket(peer_addr->getFamily(), SOCK_STREAM, 0);
+    m_fd         = ::socket(peer_addr->getFamily(), SOCK_STREAM, 0);
 
     if (m_fd < 0) {
         LOG_ERROR << "";
@@ -36,7 +36,7 @@ TcpClient::~TcpClient()
 
 void TcpClient::reset()
 {
-    m_fd = ::socket(m_peer_addr->getFamily(), SOCK_STREAM, 0);
+    m_fd       = ::socket(m_peer_addr->getFamily(), SOCK_STREAM, 0);
     m_fd_event = FdEventGroup::GetFdEventGroup()->getFdEvent(m_fd);
     m_fd_event->setNonBlocking();
     m_conn.reset(new TcpConnection(m_event_loop, m_fd, 128, m_peer_addr, nullptr, ConnType::ConnByClient));
@@ -72,7 +72,7 @@ void TcpClient::connect()
 
 void TcpClient::writeCb()
 {
-    int error = 0;
+    int error           = 0;
     socklen_t error_len = sizeof(error);
     ::getsockopt(m_fd, SOL_SOCKET, SO_ERROR, &error, &error_len);
     if (error == 0) {

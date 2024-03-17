@@ -12,9 +12,9 @@ IPNetAddr::IPNetAddr(const std::string &ip, uint16_t port)
     // 初始化
     memset(&m_addr, 0, sizeof(m_addr));
 
-    m_addr.sin_family = AF_INET;                     // ipv4
+    m_addr.sin_family      = AF_INET;                // ipv4
     m_addr.sin_addr.s_addr = inet_addr(m_ip.c_str());// ip
-    m_addr.sin_port = htons(m_port);                 // port: 主机字节序转为网络字节序
+    m_addr.sin_port        = htons(m_port);          // port: 主机字节序转为网络字节序
 }
 
 IPNetAddr::IPNetAddr(const std::string &addr)
@@ -27,7 +27,7 @@ IPNetAddr::IPNetAddr(const std::string &addr)
     }
 
 
-    m_ip = addr.substr(0, i);
+    m_ip   = addr.substr(0, i);
     m_port = std::atoi(addr.substr(i + 1, addr.size() - i - 1).c_str());
 
     LOG_INFO << "ip: " << m_ip;
@@ -35,14 +35,14 @@ IPNetAddr::IPNetAddr(const std::string &addr)
 
     memset(&m_addr, 0, sizeof(m_addr));
 
-    m_addr.sin_family = AF_INET;                     // ipv4
+    m_addr.sin_family      = AF_INET;                // ipv4
     m_addr.sin_addr.s_addr = inet_addr(m_ip.c_str());// ip
-    m_addr.sin_port = htons(m_port);
+    m_addr.sin_port        = htons(m_port);
 }
 
 IPNetAddr::IPNetAddr(sockaddr_in addr) : m_addr(addr)
 {
-    m_ip = std::string(inet_ntoa(m_addr.sin_addr));
+    m_ip   = std::string(inet_ntoa(m_addr.sin_addr));
     m_port = ntohs(m_addr.sin_port);
 }
 

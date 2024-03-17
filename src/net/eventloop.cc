@@ -7,12 +7,12 @@
 
 #define ADD_TO_EPOLL()                                                                                                      \
     auto it = m_listen_fds.find(event->getFd());                                                                            \
-    int op = EPOLL_CTL_ADD;                                                                                                 \
+    int op  = EPOLL_CTL_ADD;                                                                                                \
     if (it != m_listen_fds.end()) {                                                                                         \
         op = EPOLL_CTL_MOD;                                                                                                 \
     }                                                                                                                       \
     epoll_event tmp = event->getEpollEvent();                                                                               \
-    int ret = epoll_ctl(m_epoll_fd, op, event->getFd(), &tmp);                                                              \
+    int ret         = epoll_ctl(m_epoll_fd, op, event->getFd(), &tmp);                                                      \
     if (ret < 0) {                                                                                                          \
         LOG_ERROR << "failed ADD_TO_EPOLL epoll_ctl when add fd " << event->getFd() << ", error info: " << strerror(errno); \
     }                                                                                                                       \
@@ -24,9 +24,9 @@
     if (it == m_listen_fds.end()) {                                                                                         \
         return;                                                                                                             \
     }                                                                                                                       \
-    int op = EPOLL_CTL_DEL;                                                                                                 \
+    int op          = EPOLL_CTL_DEL;                                                                                        \
     epoll_event tmp = event->getEpollEvent();                                                                               \
-    int ret = epoll_ctl(m_epoll_fd, op, event->getFd(), &tmp);                                                              \
+    int ret         = epoll_ctl(m_epoll_fd, op, event->getFd(), &tmp);                                                      \
     if (ret < 0) {                                                                                                          \
         LOG_ERROR << "failed DEL_TO_EPOLL epoll_ctl when del fd " << event->getFd() << ", error info: " << strerror(errno); \
     }                                                                                                                       \
@@ -38,8 +38,8 @@ namespace mrpc
 {
 
 static thread_local EventLoop *t_current_eventloop = nullptr;
-static int g_epoll_max_timeout = 10000;
-static int g_epoll_max_events = 10;
+static int g_epoll_max_timeout                     = 10000;
+static int g_epoll_max_events                      = 10;
 
 EventLoop::EventLoop() : m_wakeup_fd_event(nullptr)
 {
@@ -194,7 +194,7 @@ int EventLoop::createEventfd()
 
 void EventLoop::initWakeUpFdEvent()
 {
-    m_wakeup_fd = createEventfd();
+    m_wakeup_fd       = createEventfd();
     m_wakeup_fd_event = new WakeUpFdEvent(m_wakeup_fd);
     m_wakeup_fd_event->listen(FdEvent::EVENT_IN, [this]() {
         char buf[8];
