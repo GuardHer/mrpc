@@ -27,9 +27,9 @@ public:
     void decode(std::vector<AbstractProtocol::s_ptr> &out_messages, TcpBuffer::s_ptr buffer) override
     {
         StringProtocol::s_ptr msg = std::make_shared<StringProtocol>();
-        std::string tmp = buffer->readAllAsString();
-        msg->info = tmp;
-        msg->m_msg_id = "123465";
+        std::string tmp           = buffer->readAllAsString();
+        msg->info                 = tmp;
+        msg->m_msg_id             = "123465";
         out_messages.push_back(msg);
     }
 };

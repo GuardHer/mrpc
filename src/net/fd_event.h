@@ -77,11 +77,11 @@ public:
     std::function<void()> getErrorCallback() const { return m_error_callback; }
 
 private:
-    int m_fd{-1};
+    int m_fd { -1 };
     epoll_event m_listen_events;
-    std::function<void()> m_read_callback{nullptr};
-    std::function<void()> m_write_callback{nullptr};
-    std::function<void()> m_error_callback{nullptr};
+    std::function<void()> m_read_callback { nullptr };
+    std::function<void()> m_write_callback { nullptr };
+    std::function<void()> m_error_callback { nullptr };
 };
 }// namespace mrpc
 

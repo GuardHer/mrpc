@@ -15,17 +15,17 @@ public:
     static char PB_END;  // 结束字符 0x03
 
 public:
-    int32_t m_pk_len{0};          // 整包长度
-    int32_t m_msg_id_len{0};      // msgid 长度
-    int32_t m_method_len{0};      // 方法名长度
-    int32_t m_error_code{0};      // 错误码
-    int32_t m_error_info_len{0};  // 错误信息长度
-    int32_t m_check_sum{0};       // 校验和
-    std::string m_method_name{""};// 方法名
-    std::string m_error_info{""}; // 错误信息
-    std::string m_pb_data{""};    // Protobuf 序列化数据
+    int32_t m_pk_len { 0 };          // 整包长度
+    int32_t m_msg_id_len { 0 };      // msgid 长度
+    int32_t m_method_len { 0 };      // 方法名长度
+    int32_t m_error_code { 0 };      // 错误码
+    int32_t m_error_info_len { 0 };  // 错误信息长度
+    int32_t m_check_sum { 0 };       // 校验和
+    std::string m_method_name { "" };// 方法名
+    std::string m_error_info { "" }; // 错误信息
+    std::string m_pb_data { "" };    // Protobuf 序列化数据
 
-    bool parse_success{false};
+    bool parse_success { false };
 };
 
 

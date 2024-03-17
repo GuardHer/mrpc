@@ -66,9 +66,9 @@ public:
 private:
     NetAddr::s_ptr m_peer_addr;
     NetAddr::s_ptr m_local_addr;
-    EventLoop *m_event_loop{nullptr};
-    int m_fd{-1};
-    FdEvent *m_fd_event{nullptr};
+    EventLoop *m_event_loop { nullptr };
+    int m_fd { -1 };
+    FdEvent *m_fd_event { nullptr };
     TcpConnection::s_ptr m_conn;
 
     ConnectionCallback m_conn_callback;
@@ -76,7 +76,7 @@ private:
     WriteCompleteCallback m_write_complete_callback;
     ReadCallback m_read_callback;
 
-    int m_connect_error_code{0};
+    int m_connect_error_code { 0 };
     std::string m_connect_error_info;
 };
 

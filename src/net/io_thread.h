@@ -32,11 +32,11 @@ private:
     static void *Main(void *arg);
 
 private:
-    int32_t m_tid{-1};               // 线程号
-    pthread_t m_thread{0};           // 线程句柄
-    EventLoop *m_event_loop{nullptr};// 当前io线程的loop对象
-    sem_t m_init_semaphore;          // 信号量
-    sem_t m_start_semaphore;         // 信号量
+    int32_t m_tid { -1 };               // 线程号
+    pthread_t m_thread { 0 };           // 线程句柄
+    EventLoop *m_event_loop { nullptr };// 当前io线程的loop对象
+    sem_t m_init_semaphore;             // 信号量
+    sem_t m_start_semaphore;            // 信号量
 };
 
 }// namespace mrpc

@@ -13,7 +13,7 @@ struct AbstractProtocol
 {
 public:
     typedef std::shared_ptr<AbstractProtocol> s_ptr;
-    virtual ~AbstractProtocol(){};
+    virtual ~AbstractProtocol() {};
 
 public:
     std::string m_msg_id;

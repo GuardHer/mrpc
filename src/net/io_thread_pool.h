@@ -23,8 +23,8 @@ public:
     IOThread *getIOThread();// no thread safe
 
 private:
-    int m_size{0};
-    size_t m_index{0};
+    int m_size { 0 };
+    size_t m_index { 0 };
     std::vector<IOThread *> m_io_threads;
 };
 }// namespace mrpc

@@ -45,7 +45,7 @@ public:
 
 private:
     T &m_mutex;
-    bool m_is_lock{false};
+    bool m_is_lock { false };
 };
 
 // 互斥锁

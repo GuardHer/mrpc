@@ -20,7 +20,7 @@ public:
     static FdEventGroup *GetFdEventGroup();
 
 private:
-    int m_size{0};
+    int m_size { 0 };
     Mutex m_mutex;
     std::vector<FdEvent *> m_fd_groups;
 };

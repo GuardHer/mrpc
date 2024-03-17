@@ -15,52 +15,59 @@ AllowShortLoopsOnASingleLine: true
 AlwaysBreakAfterReturnType: None
 AlwaysBreakTemplateDeclarations: Yes
 BreakBeforeBraces: Custom
-BraceWrapping: 
-  AfterCaseLabel: false  
-  AfterClass: true
-  AfterStruct: true
-  AfterControlStatement: Never
-  AfterEnum: true
-  AfterFunction: true
-  AfterNamespace: true
-  AfterUnion: true
-  BeforeCatch: false
-  BeforeElse: false
-  IndentBraces: false
-  SplitEmptyFunction: false
-  SplitEmptyRecord: true
-BreakBeforeBinaryOperators: None
-BreakBeforeTernaryOperators: true
-BreakConstructorInitializers: BeforeColon
-BreakInheritanceList: BeforeColon
-ColumnLimit: 0
-CompactNamespaces: false
-ContinuationIndentWidth: 8
-IndentCaseLabels: true
-IndentPPDirectives: None
-IndentWidth: 4
-KeepEmptyLinesAtTheStartOfBlocks: true
-MaxEmptyLinesToKeep: 2
-NamespaceIndentation: None
-ObjCSpaceAfterProperty: false
-ObjCSpaceBeforeProtocolList: true
-PointerAlignment: Right
-ReflowComments: false
-SpaceAfterCStyleCast: true
-SpaceAfterLogicalNot: false
-SpaceAfterTemplateKeyword: false
-SpaceBeforeAssignmentOperators: true
-SpaceBeforeCpp11BracedList: false
-SpaceBeforeCtorInitializerColon: true
-SpaceBeforeInheritanceColon: true
-SpaceBeforeParens: ControlStatements
-SpaceBeforeRangeBasedForLoopColon: false
-SpaceInEmptyParentheses: false
-SpacesBeforeTrailingComments: 0
-SpacesInAngles: false
-SpacesInCStyleCastParentheses: false
-SpacesInContainerLiterals: false
-SpacesInParentheses: false
-SpacesInSquareBrackets: false
+BraceWrapping:  # 大括号换行
+  AfterCaseLabel: false   # case标签后换行
+  AfterClass: true        # 类后换行
+  AfterStruct: true       # 结构体后换行
+  AfterControlStatement: Never # 控制语句后换行
+  AfterEnum: true            # 枚举后换行
+  AfterFunction: true        # 函数后换行
+  AfterNamespace: true       # 命名空间后换行
+  AfterUnion: true           # 联合后换行
+  BeforeCatch: false         # catch前换行
+  BeforeElse: false          # else前换行
+  IndentBraces: false        # 缩进大括号
+  SplitEmptyFunction: false  # 空函数体换行
+  SplitEmptyRecord: true     # 空结构体换行
+
+AlignTrailingComments: true       # 对齐尾部注释
+BreakBeforeBinaryOperators: None  # 二元操作符换行
+BreakBeforeTernaryOperators: true # 三元操作符换行
+BreakConstructorInitializers: BeforeColon # 构造函数初始化列表换行
+BreakInheritanceList: BeforeColon  # 继承列表换行
+ColumnLimit: 0  # 列宽
+CompactNamespaces: false   # 命名空间压缩
+ContinuationIndentWidth: 8 # 续行缩进宽度
+IndentCaseLabels: true     # case标签缩进
+IndentPPDirectives: None   # 预处理指令缩进
+IndentWidth: 4             # 缩进宽度
+KeepEmptyLinesAtTheStartOfBlocks: true   # 保留块开始的空行
+MaxEmptyLinesToKeep: 2                   # 最大空行数
+NamespaceIndentation: None               # 命名空间缩进
+ObjCSpaceAfterProperty: false            # ObjC属性后空格
+ObjCSpaceBeforeProtocolList: true        # ObjC协议列表前空格
+PointerAlignment: Right                  # 指针对齐
+ReflowComments: false                    # 注释换行
+SpaceAfterCStyleCast: true               # C风格转换后空格
+SpaceAfterLogicalNot: false              # 逻辑非后空格
+SpaceAfterTemplateKeyword: false         # 模板关键字后空格
+SpaceBeforeAssignmentOperators: true     # 赋值操作符前空格
+SpaceBeforeCpp11BracedList: true         # C++11花括号列表前空格
+SpaceBeforeCtorInitializerColon: true    # 构造函数初始化列表冒号前空格
+SpaceBeforeInheritanceColon: true        # 继承列表冒号前空格
+SpaceBeforeParens: ControlStatements     # 括号前空格
+SpaceBeforeRangeBasedForLoopColon: false # 范围for循环冒号前空格
+SpaceInEmptyParentheses: false           # 空括号内空格
+SpacesBeforeTrailingComments: 0          # 尾部注释前空格
+SpacesInAngles: false                    # 尖括号内空格
+SpacesInCStyleCastParentheses: false     # C风格转换括号内空格
+SpacesInContainerLiterals: false         # 容器字面量内空格
+SpacesInParentheses: false               # 括号内空格
+SpacesInSquareBrackets: false            # 方括号内空格
+SpaceBeforeSquareBrackets: false         # 方括号前空格
+SpaceBeforeBraceInitializers: true       # 大括号初始化列表前空格
+SpaceAfterBraceInitializers: true        # 大括号初始化列表后空格
+SpaceAfterControlStatementKeyword: true  # 控制语句关键字后空格
+Cpp11BracedListStyle: false              # C++11花括号列表风格
 TabWidth: 4
 UseTab: Never

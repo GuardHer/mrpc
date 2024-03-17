@@ -13,7 +13,7 @@ class AbstractCoder
 public:
     typedef std::shared_ptr<AbstractCoder> s_ptr;
 
-    virtual ~AbstractCoder(){};
+    virtual ~AbstractCoder() {};
 
 public:
     /// @brief 编码, 将message对象转为字节流, 写入buffer

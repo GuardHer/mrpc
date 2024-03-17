@@ -18,9 +18,9 @@ namespace mrpc
 enum ConnState
 {
     NotConnected = 1,
-    Connected = 2,
-    HalfClosing = 3,
-    Closed = 3,
+    Connected    = 2,
+    HalfClosing  = 3,
+    Closed       = 3,
 };
 
 enum ConnType
@@ -88,17 +88,17 @@ public:
     void setLocalAddr(NetAddr::s_ptr addr) { m_local_addr = addr; }
 
 private:
-    int m_fd{-1};                                // socket
-    EventLoop *m_event_loop{nullptr};            //
-    NetAddr::s_ptr m_local_addr;                 //
-    NetAddr::s_ptr m_peer_addr;                  //
-    TcpBuffer::s_ptr m_in_buffer;                // 接收缓冲区
-    TcpBuffer::s_ptr m_out_buffer;               // 发送缓冲区
-    FdEvent *m_fd_event{nullptr};                //
-    ConnState m_state{ConnState::Connected};     //
-    ConnType m_conn_type{ConnType::ConnByServer};//
-    AbstractCoder *m_coder{nullptr};             // 编解码
-    CloseCallback m_close_cb;                    // 关闭连接回调, 用于客户端关闭连接后, 服务端正确的删除这个连接
+    int m_fd { -1 };                                // socket
+    EventLoop *m_event_loop { nullptr };            //
+    NetAddr::s_ptr m_local_addr;                    //
+    NetAddr::s_ptr m_peer_addr;                     //
+    TcpBuffer::s_ptr m_in_buffer;                   // 接收缓冲区
+    TcpBuffer::s_ptr m_out_buffer;                  // 发送缓冲区
+    FdEvent *m_fd_event { nullptr };                //
+    ConnState m_state { ConnState::Connected };     //
+    ConnType m_conn_type { ConnType::ConnByServer };//
+    AbstractCoder *m_coder { nullptr };             // 编解码
+    CloseCallback m_close_cb;                       // 关闭连接回调, 用于客户端关闭连接后, 服务端正确的删除这个连接
 
     std::vector<write_callback_pair> m_write_callbask;
     std::map<std::string, ReadCallback> m_read_callbask;

@@ -49,8 +49,8 @@ public:
     sockaddr_in getSockAddrIn() override { return m_addr; }
 
 private:
-    std::string m_ip{};
-    uint16_t m_port{0};
+    std::string m_ip {};
+    uint16_t m_port { 0 };
 
     sockaddr_in m_addr;
 };

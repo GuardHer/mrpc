@@ -30,9 +30,9 @@ private:
     TcpAcceptor::s_ptr m_acceptor;
     NetAddr::s_ptr m_addr;// listen addr
     FdEvent *listen_fd_event;
-    EventLoop *m_main_event_loop{nullptr};// main reactor
-    IOThreadPool *m_io_threads{nullptr};  // subReactors
-    int m_client_counts{0};
+    EventLoop *m_main_event_loop { nullptr };// main reactor
+    IOThreadPool *m_io_threads { nullptr };  // subReactors
+    int m_client_counts { 0 };
 
     std::set<TcpConnection::s_ptr> m_clients;
 };

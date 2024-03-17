@@ -49,15 +49,15 @@ private:
     void onTimeout();
 
 private:
-    bool m_is_init{false};
-    NetAddr::s_ptr m_peer_addr{nullptr};         // 对端地址
-    NetAddr::s_ptr m_local_addr{nullptr};        // 本地地址
-    std::shared_ptr<TcpClient> m_client{nullptr};// tcp client
-    controller_s_ptr m_controller{nullptr};      // controller
-    message_s_ptr m_request{nullptr};            // request
-    message_s_ptr m_response{nullptr};           // response
-    closure_s_ptr m_closure{nullptr};            // done
-    TimerEvent::s_ptr m_timer_event{nullptr};    //
+    bool m_is_init { false };
+    NetAddr::s_ptr m_peer_addr { nullptr };         // 对端地址
+    NetAddr::s_ptr m_local_addr { nullptr };        // 本地地址
+    std::shared_ptr<TcpClient> m_client { nullptr };// tcp client
+    controller_s_ptr m_controller { nullptr };      // controller
+    message_s_ptr m_request { nullptr };            // request
+    message_s_ptr m_response { nullptr };           // response
+    closure_s_ptr m_closure { nullptr };            // done
+    TimerEvent::s_ptr m_timer_event { nullptr };    //
 };
 
 }// namespace mrpc

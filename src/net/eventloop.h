@@ -69,16 +69,16 @@ private:
     void initTimer();
 
 private:
-    int32_t m_tid{0};                // 进程id
-    int m_epoll_fd{0};               // epoll_fd
-    int m_wakeup_fd{0};              // wake_fd
+    int32_t m_tid { 0 };             // 进程id
+    int m_epoll_fd { 0 };            // epoll_fd
+    int m_wakeup_fd { 0 };           // wake_fd
     WakeUpFdEvent *m_wakeup_fd_event;// wake_fd_event
-    bool m_stop_flag{false};         // 是否停止
-    bool m_is_looping{false};        // 是否停止
+    bool m_stop_flag { false };      // 是否停止
+    bool m_is_looping { false };     // 是否停止
     std::set<int> m_listen_fds;      // 监听套接字集合 (wake_fd, client_fd, timer_fd)
     std::queue<Task> m_pending_tasks;// 任务队列 (需要mutex)
     Mutex m_mutex;                   // 互斥锁
-    Timer *m_timer{nullptr};         // 定时器
+    Timer *m_timer { nullptr };      // 定时器
 };
 
 }// namespace mrpc

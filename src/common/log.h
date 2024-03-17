@@ -44,7 +44,8 @@ std::string extractFileName(const std::string &absolutePath);
 /// @return color对应的str
 const char *levelToColor(LogLevel level);
 
-class Logger {
+class Logger
+{
 public:
     Logger(LogLevel level = LogLevel::DEBUG) : m_set_level(level) {}
     ~Logger();
@@ -78,14 +79,15 @@ private:
     std::vector<std::string> m_buffer;// 日志缓存 (mutex)
     std::string m_file_name;          // 日志输出文件名
     std::string m_file_path;          // 日志输出路径
-    int32_t m_max_file_size{0};       // 日志单个文件最大大小
+    int32_t m_max_file_size { 0 };    // 日志单个文件最大大小
 };
 
-class Logging {
+class Logging
+{
 public:
 #if __cplusplus >= 202002L
     Logging(LogLevel level, const std::source_location &loc = std::source_location::current())
-        : m_level(level), m_file_name(extractFileName(loc.file_name())), m_func_name(loc.function_name()), m_file_line(loc.line()), m_thread_id(getThreadId()), m_pid(getPid()){};
+        : m_level(level), m_file_name(extractFileName(loc.file_name())), m_func_name(loc.function_name()), m_file_line(loc.line()), m_thread_id(getThreadId()), m_pid(getPid()) {};
 #endif
     Logging(const char *file, int line, LogLevel level, const char *func)
         : m_level(level), m_file_name(extractFileName(std::string(file))), m_func_name(std::string(func)), m_file_line(line), m_thread_id(getThreadId()), m_pid(getPid()) {}
@@ -105,13 +107,13 @@ public:
     LogStream &stream();
 
 private:
-    LogLevel m_level{LogLevel::UNKNOWN};// 日志级别
-    std::string m_file_name;            // 文件名
-    std::string m_func_name;            // 函数名
-    int m_file_line{-1};                // 行号
-    int32_t m_thread_id{-1};            // 线程id
-    int32_t m_pid{-1};                  // 进程id
-    LogStream m_stream;                 // 日志流
+    LogLevel m_level { LogLevel::UNKNOWN };// 日志级别
+    std::string m_file_name;               // 文件名
+    std::string m_func_name;               // 函数名
+    int m_file_line { -1 };                // 行号
+    int32_t m_thread_id { -1 };            // 线程id
+    int32_t m_pid { -1 };                  // 进程id
+    LogStream m_stream;                    // 日志流
 };
 
 #if __cplusplus >= 202002L
