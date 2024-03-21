@@ -2,6 +2,7 @@
 #define MRPC_COMMON_UTIL_H
 #include <endian.h>
 #include <stdint.h>
+#include <string>
 #include <sys/types.h>
 #include <type_traits>
 #include <unistd.h>
@@ -11,10 +12,20 @@ namespace mrpc
 
 /// 获取当前进程id
 int32_t getPid();
+
 /// 获取当前线程id
 int32_t getThreadId();
+
 /// 获取当前时间 ms
 int64_t getNowMs();
+
+/// @brief 获取当前时间的字符串, 精确到 ms
+/// @return "%Y-%m-%d %H:%M:%S.xxx"
+std::string getCurrentTimeMillisecondsString();
+
+/// @brief 获取当前时间的字符串, 精确到 day
+/// @return "%Y%m%d"
+std::string getCurrentTimeDayString();
 
 /// 网络字节序转主机字节序
 uint32_t networkToHost32(const char *net32);

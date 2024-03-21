@@ -6,6 +6,7 @@
 #include "src/common/util.h"
 #include <memory>
 #include <queue>
+#include <semaphore.h>
 #if __cplusplus >= 202002L
 #include <source_location>// std::source_location
 #endif
@@ -82,6 +83,34 @@ private:
     int32_t m_max_file_size { 0 };    // 日志单个文件最大大小
 };
 
+class AsyncLogger
+{
+    /// {m_file_path}/{m_file_name}_yyyymmdd.{m_no}
+public:
+    typedef std::queue<std::vector<std::string>> LogQueue;
+
+    AsyncLogger(const std::string &file_name, const std::string &file_path, int32_t max_size);
+
+public:
+    /// @brief 将 buffer 里面的数据输出到文件
+    static void *Loop(void *arg);
+
+private:
+    LogQueue m_buffer;               // 日志缓存 (mutex)
+    std::string m_file_name;         // 日志输出文件名
+    std::string m_file_path;         // 日志输出路径
+    int32_t m_max_file_size { 0 };   // 日志单个文件最大大小
+    sem_t m_semaphore;               // 信号量
+    pthread_t m_thread;              // 线程
+    pthread_cond_t m_condtion;       // 条件变量
+    mrpc::Mutex m_mutex;             // 互斥锁
+    std::string m_date;              // 当前打印日志的文件日期
+    FILE *m_file_hanlder { nullptr };// 当前打开的日志文件句柄
+    bool m_reopen_flag { false };    // 是否需要重新打开日志文件句柄
+    int32_t m_no { 0 };              // 日志文件序号
+};
+
+
 class Logging
 {
 public:
@@ -115,6 +144,7 @@ private:
     int32_t m_pid { -1 };                  // 进程id
     LogStream m_stream;                    // 日志流
 };
+
 
 #if __cplusplus >= 202002L
 #define LOG_DEBUG                                                                \

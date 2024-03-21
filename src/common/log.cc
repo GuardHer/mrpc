@@ -153,20 +153,54 @@ void Logger::log()
     // printf("%s\n", msg.c_str());
 }
 
+////////////////////// AsyncLogger /////////////////////////////
+AsyncLogger::AsyncLogger(const std::string &file_name, const std::string &file_path, int32_t max_size)
+    : m_file_name(file_name), m_file_path(file_path), m_max_file_size(max_size)
+{
+    // 初始化信号量
+    sem_init(&m_semaphore, 0, 0);
+    // 创建线程
+    pthread_create(&m_thread, nullptr, &AsyncLogger::Loop, this);
+    // 等待信号量
+    sem_wait(&m_semaphore);
+
+    // 初始化条件变量
+    pthread_cond_init(&m_condtion, nullptr);
+}
+
+void *AsyncLogger::Loop(void *arg)
+{
+    AsyncLogger *async_logger = static_cast<AsyncLogger *>(arg);
+    sem_post(&async_logger->m_semaphore);
+    while (1) {
+        ScopeMutex<Mutex> guard_lock(async_logger->m_mutex);
+        while (async_logger->m_buffer.empty()) {
+            pthread_cond_wait(&(async_logger->m_condtion), async_logger->m_mutex.getMutex());
+        }
+        std::vector<std::string> tmp;
+        tmp.swap(async_logger->m_buffer.front());
+        async_logger->m_buffer.pop();
+        guard_lock.unlock();
+
+        // 获取当前时间 "%Y%m%d", eg: 20240317
+        std::string time_str = getCurrentTimeDayString();
+        if (time_str != async_logger->m_date) {
+            async_logger->m_no          = 0;
+            async_logger->m_reopen_flag = true;
+            async_logger->m_date        = time_str;
+        }
+        if (async_logger->m_file_hanlder == nullptr) {
+            async_logger->m_reopen_flag = true;
+        }
+    }
+    return nullptr;
+}
+
+
+////////////////////// Logging /////////////////////////////
 LogStream &Logging::stream()
 {
-    struct timeval now_time;
-    gettimeofday(&now_time, nullptr);
-
-    struct tm now_time_t;
-    localtime_r(&now_time.tv_sec, &now_time_t);
-
-    char buf[128];
-    strftime(&buf[0], 123, "%y-%m-%d %H:%M:%S", &now_time_t);
-    std::string time_str(buf);
-
-    int ms   = now_time.tv_usec / 1000;
-    time_str = time_str + "." + std::to_string(ms);
+    std::string time_str = getCurrentTimeMillisecondsString();
 
     m_stream << levelToColor(m_level) << "[" << LogLevelToString(m_level) << "]" << CLR_CLR
              << "[" << time_str << "]"
