@@ -3,6 +3,11 @@
 <root>
 	<log>
 		<log_level>DEBUG</log_level>
+		<log_file_name>rpc_log</log_file_name>
+		<log_color>0</log_color>
+		<log_file_path>/home/guardher/code/project/mrpc/log</log_file_path>
+		<log_max_file_size>10485760</log_max_file_size>
+		<log_sync_inteval>500</log_sync_inteval>
 	</log>
 
 </root>

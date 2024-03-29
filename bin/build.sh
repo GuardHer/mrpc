@@ -15,8 +15,8 @@ cd "$BUILD_DIR" || exit 1
 # 检查是否提供了目标名称作为参数
 if [ -z "$1" ]; then
     # 如果没有提供目标名称，则构建所有目标
-    cmake --build . --config Debug -j 18
+    cmake --build . --config Debug -j 8
 else
     # 如果提供了目标名称，则构建指定目标
-    cmake --build . --target "$1" --config Debug -j 18
+    cmake --build . --target "$1" --config Debug -j 8
 fi

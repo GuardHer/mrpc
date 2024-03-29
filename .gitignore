@@ -1,3 +1,4 @@
 /build
 /test/python
 bin/
+log/

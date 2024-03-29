@@ -85,6 +85,7 @@ target_link_libraries(mrpc ${LIBS})
 # test_log
 add_executable(log_test 
 	${SOURCE_FILE_COMMON} 
+	${SOURCE_FILE_NET}
 	${PROJECT_SOURCE_DIR}/test/test_log.cc
 )
 target_link_libraries(log_test ${LIBS})

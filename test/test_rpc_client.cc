@@ -35,10 +35,10 @@ void test_tcp_client()
     auto conn_fun = [&cli](const TcpConnectionPtr &conn, const AbstractProtocolPtr &protocol) {
         LOG_INFO << conn->getState() << ", conn_fun conn success!";
         // std::shared_ptr<TinyPBProtocol> message = std::make_shared<TinyPBProtocol>();
-        auto message = std::dynamic_pointer_cast<TinyPBProtocol>(protocol);
-        message->m_msg_id = "99998888";
+        auto message          = std::dynamic_pointer_cast<TinyPBProtocol>(protocol);
+        message->m_msg_id     = "99998888";
         message->m_msg_id_len = static_cast<int32_t>(message->m_msg_id.length());
-        message->m_check_sum = int32_t(456);
+        message->m_check_sum  = int32_t(456);
 
         makeOrderRequest request;
         request.set_price(9);
@@ -48,8 +48,8 @@ void test_tcp_client()
             return;
         }
         message->m_method_name = "Order.makeOrder";
-        message->m_method_len = static_cast<int32_t>(message->m_method_name.length());
-        message->m_pk_len = 26 + message->m_msg_id_len + message->m_method_len + message->m_error_info_len + message->m_pb_data.length();
+        message->m_method_len  = static_cast<int32_t>(message->m_method_name.length());
+        message->m_pk_len      = 26 + message->m_msg_id_len + message->m_method_len + message->m_error_info_len + message->m_pb_data.length();
 
         LOG_DEBUG << "m_pk_len: " << message->m_pk_len;
 
@@ -92,14 +92,14 @@ void test_msg_id()
 void test_rpc_channel()
 {
     using namespace mrpc;
-    IPNetAddr::s_ptr addr = std::make_shared<IPNetAddr>("127.0.0.1", 12345);
+    IPNetAddr::s_ptr addr               = std::make_shared<IPNetAddr>("127.0.0.1", 12345);
     std::shared_ptr<RpcChannel> channel = std::make_shared<RpcChannel>(addr);
 
     std::shared_ptr<makeOrderRequest> request = std::make_shared<makeOrderRequest>();
     request->set_price(100);
     request->set_goods("apple");
     std::shared_ptr<makeOrderResponse> response = std::make_shared<makeOrderResponse>();
-    std::shared_ptr<RpcController> controller = std::make_shared<RpcController>();
+    std::shared_ptr<RpcController> controller   = std::make_shared<RpcController>();
     controller->SetMsgId(mrpc::MsgIdUtil::GenMsgId());
 
     std::function<void()> reply_package_func = [controller, channel, request, response]() mutable {
@@ -128,6 +128,8 @@ void test_rpc_channel()
 int main()
 {
     mrpc::Config::SetGlobalConfig("../conf/mrpc.xml");
+    auto config = mrpc::Config::GetGlobalConfig();
+    config->setLogFileName("rpc_client");
     mrpc::Logger::InitGlobalLogger();
 
     // tcp connection

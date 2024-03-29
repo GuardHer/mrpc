@@ -63,7 +63,7 @@ void Timer::resetArriveTime()
         LOG_ERROR << "timerfd_settime error info:  " << strerror(errno);
     }
 
-    LOG_DEBUG << "timer reset to: " << now + inteval;
+    // LOG_DEBUG << "timer reset to: " << now + inteval;
 }
 
 void Timer::addTimerEvent(TimerEvent::s_ptr event)

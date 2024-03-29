@@ -9,13 +9,13 @@ TimerEvent::TimerEvent(int interval, bool is_repeated, std::function<void()> cb)
     : m_interval(interval), m_is_repeated(is_repeated), m_task(std::move(cb))
 {
 
+    LOG_DEBUG << "success create timer event, will excute at: " << m_arrive_time;
     resetArriveTime();
 }
 
 void TimerEvent::resetArriveTime()
 {
     m_arrive_time = getNowMs() + m_interval;
-    LOG_DEBUG << "success create timer event, will excute at: " << m_arrive_time;
 }
 
 }// namespace mrpc

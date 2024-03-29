@@ -78,6 +78,7 @@
 		"codecvt": "cpp",
 		"iomanip": "cpp",
 		"queue": "cpp",
-		"*.inc": "cpp"
+		"*.inc": "cpp",
+		"complex": "cpp"
 	}
 }

@@ -3,7 +3,9 @@
 
 #include "src/common/log_stream.h"
 #include "src/common/mutex.h"
+#include "src/common/singleton.h"
 #include "src/common/util.h"
+#include "src/net/timer_event.h"
 #include <memory>
 #include <queue>
 #include <semaphore.h>
@@ -45,10 +47,12 @@ std::string extractFileName(const std::string &absolutePath);
 /// @return color对应的str
 const char *levelToColor(LogLevel level);
 
+class AsyncLogger;
+
 class Logger
 {
 public:
-    Logger(LogLevel level = LogLevel::DEBUG) : m_set_level(level) {}
+    Logger(LogLevel level = LogLevel::DEBUG);
     ~Logger();
 
 public:
@@ -59,11 +63,18 @@ public:
     void pushLog(const std::string &msg);
 
     /// @brief 处理队列中的日志(写入文件或者stdout)
-    void log();
+    void initLog();
 
     /// @brief 获取g_logger对应的level
     /// @return m_set_level
     LogLevel getLogLevel() const { return m_set_level; }
+
+    /// @brief
+    void syncLoop();
+
+    /// @brief 设置日志级别
+    /// @param level
+    void setLevel(LogLevel level) { m_set_level = level; }
 
 public:
     /// @brief 获取全局logger对象
@@ -75,25 +86,38 @@ public:
 
 
 private:
-    LogLevel m_set_level;             // 全局日志级别
-    mrpc::Mutex m_mutex;              // 互斥锁
-    std::vector<std::string> m_buffer;// 日志缓存 (mutex)
-    std::string m_file_name;          // 日志输出文件名
-    std::string m_file_path;          // 日志输出路径
-    int32_t m_max_file_size { 0 };    // 日志单个文件最大大小
+    LogLevel m_set_level;                       // 全局日志级别
+    mrpc::Mutex m_mutex;                        // 互斥锁
+    std::vector<std::string> m_buffer;          // 日志缓存 (mutex)
+    std::string m_file_name;                    // 日志输出文件名
+    std::string m_file_path;                    // 日志输出路径
+    int32_t m_max_file_size { 0 };              // 日志单个文件最大大小
+    std::shared_ptr<AsyncLogger> m_async_logger;//
+    std::shared_ptr<TimerEvent> m_timer_event;  //
 };
 
 class AsyncLogger
 {
-    /// {m_file_path}/{m_file_name}_yyyymmdd.{m_no}
+    /// {m_file_path}/{m_file_name}_yyyymmdd.{m_no}.log
 public:
     typedef std::queue<std::vector<std::string>> LogQueue;
 
     AsyncLogger(const std::string &file_name, const std::string &file_path, int32_t max_size);
+    ~AsyncLogger();
 
 public:
     /// @brief 将 buffer 里面的数据输出到文件
     static void *Loop(void *arg);
+
+    /// @brief
+    void push(const std::vector<std::string> &buffer);
+
+    /// @brief 关闭异步日志
+    void stop();
+
+    /// @brief 刷新到磁盘
+    void flush();
+
 
 private:
     LogQueue m_buffer;               // 日志缓存 (mutex)
@@ -108,6 +132,7 @@ private:
     FILE *m_file_hanlder { nullptr };// 当前打开的日志文件句柄
     bool m_reopen_flag { false };    // 是否需要重新打开日志文件句柄
     int32_t m_no { 0 };              // 日志文件序号
+    bool m_stop_flag { false };      // 退出循环
 };
 
 
@@ -145,39 +170,40 @@ private:
     LogStream m_stream;                    // 日志流
 };
 
+extern Logger g_logger;
 
 #if __cplusplus >= 202002L
-#define LOG_DEBUG                                                                \
-    if (mrpc::Logger::GetGlobalLogger()->getLogLevel() <= mrpc::LogLevel::DEBUG) \
+#define LOG_DEBUG                                              \
+    if (mrpc::g_logger.getLogLevel() <= mrpc::LogLevel::DEBUG) \
     mrpc::Logging(mrpc::LogLevel::DEBUG).stream()
-#define LOG_INFO                                                                \
-    if (mrpc::Logger::GetGlobalLogger()->getLogLevel() <= mrpc::LogLevel::INFO) \
+#define LOG_INFO                                              \
+    if (mrpc::g_logger.getLogLevel() <= mrpc::LogLevel::INFO) \
     mrpc::Logging(mrpc::LogLevel::INFO).stream()
-#define LOG_WARNING                                                                \
-    if (mrpc::Logger::GetGlobalLogger()->getLogLevel() <= mrpc::LogLevel::WARNING) \
+#define LOG_WARNING                                              \
+    if (mrpc::g_logger.getLogLevel() <= mrpc::LogLevel::WARNING) \
     mrpc::Logging(mrpc::LogLevel::WARNING).stream()
-#define LOG_ERROR                                                                \
-    if (mrpc::Logger::GetGlobalLogger()->getLogLevel() <= mrpc::LogLevel::ERROR) \
+#define LOG_ERROR                                              \
+    if (mrpc::g_logger.getLogLevel() <= mrpc::LogLevel::ERROR) \
     mrpc::Logging(mrpc::LogLevel::ERROR).stream()
-#define LOG_FATAL                                                                \
-    if (mrpc::Logger::GetGlobalLogger()->getLogLevel() <= mrpc::LogLevel::FATAL) \
+#define LOG_FATAL                                              \
+    if (mrpc::g_logger.getLogLevel() <= mrpc::LogLevel::FATAL) \
     mrpc::Logging(mrpc::LogLevel::FATAL).stream()
 
 #else
-#define LOG_DEBUG                                                                \
-    if (mrpc::Logger::GetGlobalLogger()->getLogLevel() <= mrpc::LogLevel::DEBUG) \
+#define LOG_DEBUG                                              \
+    if (mrpc::g_logger.getLogLevel() <= mrpc::LogLevel::DEBUG) \
     mrpc::Logging(__FILE__, __LINE__, mrpc::LogLevel::DEBUG, __func__).stream()
-#define LOG_INFO                                                                \
-    if (mrpc::Logger::GetGlobalLogger()->getLogLevel() <= mrpc::LogLevel::INFO) \
+#define LOG_INFO                                              \
+    if (mrpc::g_logger.getLogLevel() <= mrpc::LogLevel::INFO) \
     mrpc::Logging(__FILE__, __LINE__, mrpc::LogLevel::INFO, __func__).stream()
-#define LOG_WARNING                                                                \
-    if (mrpc::Logger::GetGlobalLogger()->getLogLevel() <= mrpc::LogLevel::WARNING) \
+#define LOG_WARNING                                              \
+    if (mrpc::g_logger.getLogLevel() <= mrpc::LogLevel::WARNING) \
     mrpc::Logging(__FILE__, __LINE__, mrpc::LogLevel::WARNING, __func__).stream()
-#define LOG_ERROR                                                                \
-    if (mrpc::Logger::GetGlobalLogger()->getLogLevel() <= mrpc::LogLevel::ERROR) \
+#define LOG_ERROR                                              \
+    if (mrpc::g_logger.getLogLevel() <= mrpc::LogLevel::ERROR) \
     mrpc::Logging(__FILE__, __LINE__, mrpc::LogLevel::ERROR, __func__).stream()
-#define LOG_FATAL                                                                \
-    if (mrpc::Logger::GetGlobalLogger()->getLogLevel() <= mrpc::LogLevel::FATAL) \
+#define LOG_FATAL                                              \
+    if (mrpc::g_logger.getLogLevel() <= mrpc::LogLevel::FATAL) \
     mrpc::Logging(__FILE__, __LINE__, mrpc::LogLevel::FATAL, __func__).stream()
 #endif
 
