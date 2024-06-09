@@ -1,5 +1,8 @@
 `
-vscode: 
+
+`v
+
+`scode: 
 调试快捷键: Ctrl + F5
 更换调试目标: Ctrl + Alt + F5
 `
@@ -43,7 +46,7 @@ cancleRepeated() ：取消定时任务的重复属性
 `定时器，他是一个TimerEvent的集合`
 `Timer 继承自 FdEvent`
 
-```
+```c++
 addTimerEvent()
 delTimerEvent()
 onTimer()
